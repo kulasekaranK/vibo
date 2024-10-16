@@ -1,0 +1,20 @@
+ion-header {
+  ion-toolbar {
+    --background: --ion-color-dark;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    ion-title {
+      font-family: "League Spartan", sans-serif;
+    }
+  }
+}
+ion-content {
+  ion-item {
+    --background: transparent;
+  }
+  ion-list {
+    background: transparent;
+  }
+
+}

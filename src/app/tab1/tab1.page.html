@@ -1,0 +1,111 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title mode="ios" size="large" color="tertiary">vibo</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="notifications-outline" size="large"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" mode="ios">
+    <ion-refresher-content
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    ></ion-refresher-content>
+  </ion-refresher>
+  <ion-list>
+    <ion-card *ngFor="let post of posts">
+      <ion-card-header>
+        <ion-item lines="none">
+          <ion-avatar slot="start">
+            <img [src]="post.profilePic" alt="" />
+          </ion-avatar>
+          <ion-label>
+            {{ post.userName }}
+            <p><ion-icon name="location"></ion-icon> {{ post.location }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-header>
+      <ion-img [src]="post.postLink"></ion-img>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-text>{{ post.caption }}</ion-text>
+        </ion-item>
+      </ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col class="ion-text-start">
+            <ion-button fill="clear" size="large" (click)="onLikePost(post.id)" color="medium">
+              <ion-icon
+                name="heart-outline"
+                [color]="post.userLikes ? 'danger' : 'medium'"
+              ></ion-icon>
+              <span>{{ post.likes }}</span>
+            </ion-button>
+            <ion-button fill="clear" size="large"  (click)="openCommentModal(post)">
+              <ion-icon color="medium"  name="chatbubble-outline"></ion-icon>
+            </ion-button>
+          </ion-col>
+          <ion-col class="ion-text-end">
+            <ion-button fill="clear" (click)="savePost(post.id)" size="large">
+              <ion-icon color="medium" name="bookmark-outline"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+        
+      </ion-grid>
+    </ion-card>
+  </ion-list>
+
+  <ion-modal
+    #modal
+    [isOpen]="isModalOpen"
+    (ionModalDidDismiss)="closeModal()"
+    [initialBreakpoint]="1"
+    [breakpoints]="[0, 0.5, 1]"
+  >
+    <ng-template>
+      <ion-header class="ion-margin" mode="md">
+        <ion-toolbar>
+          <ion-title>Comments</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list *ngFor="let comment of postComments">
+          <ion-item class="ion-margin">
+            <ion-avatar slot="start">
+              <img [src]="comment.profilePic" alt="" />
+            </ion-avatar>
+            <ion-label>
+              <p>{{ comment.userName }}</p>
+              {{ comment.comment }}
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <form #f="ngForm" (ngSubmit)="addComment(selectedPost.id)">
+            <ion-item>
+              <ion-input
+                placeholder="Write comments..."
+                [(ngModel)]="comments"
+                name="comment"
+                required
+              ></ion-input>
+
+              <ion-buttons slot="end">
+                <ion-button type="submit" [disabled]="f.invalid">
+                  <ion-icon name="send-outline"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-item>
+          </form>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+</ion-content>

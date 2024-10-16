@@ -1,0 +1,7 @@
+{
+  "name": "vibo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

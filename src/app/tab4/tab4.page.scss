@@ -1,0 +1,35 @@
+ion-header {
+  position: relative;
+   .toolbar {
+    --background: url("../../assets/HeaderBackground.png") no-repeat center
+      center / cover;
+    height: 20vh;
+ 
+    z-index: 1;
+  }
+  ion-avatar {
+    position: absolute;
+    top: 26%;
+    left: 40%;
+    z-index: 2;
+    width: 100px;
+    height: 100px;
+    border: 3px solid var(--ion-color-light);
+  }
+  .user {
+    margin-top: 12%;
+    --background: --ion-color-dark;
+  }
+  ion-item {
+    --background: --ion-color-dark;
+    margin-top: 10px;
+    ion-label,
+    ion-icon {
+      background: var(--ion-color-dark-contrast);
+      padding: 15px;
+      margin: 5px;
+      border-radius: 15px;
+    }
+  }
+  
+}

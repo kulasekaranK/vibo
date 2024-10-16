@@ -1,0 +1,118 @@
+<ion-content mode="ios">
+  <ion-header class="ion-padding">
+    <ion-label class="ion-text-center">
+      <h1>vibo</h1>
+      <p>Feel the Vibe, Share the Moment</p>
+    </ion-label>
+  </ion-header>
+
+  <form #registerForm="ngForm" >
+    <ion-list class="ion-padding ">
+
+
+      <ion-item lines="none">
+        <ion-title class="ion-text-center" size="large" mode="md">Register</ion-title>
+      </ion-item>
+
+    
+      <ion-item>
+        <ion-input
+          label="Name"
+          labelPlacement="floating"
+          name="name"
+          [(ngModel)]="name"
+          #nameCtrl="ngModel"
+          required
+        ></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" *ngIf="nameCtrl.invalid && nameCtrl.touched">
+        <ion-label color="danger">
+          <p *ngIf="nameCtrl.errors?.['required']">Name is required</p>
+        </ion-label>
+      </ion-item>
+
+   
+      <ion-item>
+        <ion-input
+          label="Email"
+          labelPlacement="floating"
+          name="email"
+          type="email"
+          [(ngModel)]="email"
+          #emailCtrl="ngModel"
+          required
+          email
+        ></ion-input>
+      </ion-item>
+  
+      <ion-item lines="none" *ngIf="emailCtrl.invalid && emailCtrl.touched">
+        <ion-label color="danger">
+          <p *ngIf="emailCtrl.errors?.['required']">Email is required</p>
+          <p *ngIf="emailCtrl.errors?.['email']">Please enter a valid email</p>
+        </ion-label>
+      </ion-item>
+
+
+      <ion-item>
+        <ion-input
+          label="Phone Number"
+          labelPlacement="floating"
+          name="phone"
+          type="tel"
+          [(ngModel)]="phone"
+          #phoneCtrl="ngModel"
+          required
+          minlength="10"
+          maxlength="15"
+        ></ion-input>
+      </ion-item>
+     
+      <ion-item lines="none" *ngIf="phoneCtrl.invalid && phoneCtrl.touched">
+        <ion-label color="danger">
+          <p *ngIf="phoneCtrl.errors?.['required']"  >Phone number is required</p>
+          <p *ngIf="phoneCtrl.errors?.['minlength']  ">Phone number must be at least 10 digits</p>
+          <p *ngIf="phoneCtrl.errors?.['maxlength '] ">Phone number cannot exceed 15 digits</p>
+        </ion-label>
+      </ion-item>
+
+    
+      <ion-item>
+        <ion-input
+          label="Password"
+          type="password"
+          labelPlacement="floating"
+          name="password"
+          [(ngModel)]="password"
+          #passwordCtrl="ngModel"
+          required
+          minlength="6"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+        <ion-label color="danger">
+          <p *ngIf="passwordCtrl.errors?.['required']">Password is required</p>
+          <p *ngIf="passwordCtrl.errors?.['minlength']">Password must be at least 6 characters</p>
+        </ion-label>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-button
+          color="tertiary"
+          size="default"
+          expand="block"
+          type="submit"
+          [disabled]="registerForm.invalid"
+          (click)="register()"
+        >Register</ion-button>
+      </ion-item>
+
+    
+      <div class="ion-padding">
+        <ion-label>Already have an account? <a [routerLink]="['/login']">Login</a></ion-label>
+      </div>
+
+    </ion-list>
+  </form>
+</ion-content>

@@ -1,0 +1,83 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title mode="ios">Create Post</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content mode="ios">
+  <form #postForm="ngForm">
+    <ion-card class="ion-padding">
+      <ion-button size="large" color="tertiary">
+        <input 
+          type="file" 
+          accept="image/*" 
+          (change)="uploadFile($event)" 
+          required 
+          name="post" 
+          style="display: none;" 
+          id="fileInput" 
+        />
+        <label for="fileInput" style="cursor: pointer;">Choose Image</label>
+      </ion-button>
+      <ion-label>Upload Image</ion-label>
+
+      <img [src]="imagePreview" *ngIf="imagePreview" alt="Image Preview" />
+    </ion-card>
+
+    <ion-list>
+      <ion-item>
+        <ion-input
+          type="text"
+          label="What's on your mind?"
+          labelPlacement="floating"
+          required
+          [(ngModel)]="caption"
+          name="postContent"
+          #postContentInput="ngModel"
+        ></ion-input>
+      </ion-item>
+      <div class="ion-padding" *ngIf="postContentInput.invalid && (postContentInput.dirty || postContentInput.touched)">
+        <ion-note color="danger">This field is required.</ion-note>
+      </div>
+
+      <ion-item>
+        <ion-input
+          type="text"
+          label="Add location (optional)"
+          labelPlacement="floating"
+          [(ngModel)]="location"
+          name="location"
+        ></ion-input>
+      </ion-item>
+    </ion-list>
+  </form>
+
+  <ion-fab vertical="bottom" horizontal="end">
+    <ion-fab-button color="secondary" (click)="takePhoto()">
+      <ion-icon name="camera"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>
+
+<ion-footer>
+  <ion-button
+    type="submit"
+    size="default"
+    color="tertiary"
+    expand="block"
+    [disabled]="postForm.invalid"
+    (click)="createPost(postForm)"
+  >
+    Post
+  </ion-button>
+</ion-footer>
+
+<ion-toast
+  [isOpen]="showToast"
+  message="{{ toastMessage }}"
+  duration="3000"
+ 
+  position="top"
+  (didDismiss)="showToast = false"
+></ion-toast>

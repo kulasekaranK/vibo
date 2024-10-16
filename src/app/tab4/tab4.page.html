@@ -1,0 +1,219 @@
+<ion-content fullscreen="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" mode="ios">
+    <ion-refresher-content
+      refreshingSpinner="circles"
+      refreshingText="Refreshing..."
+    ></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="toolbar" mode="md">
+      <ion-title color="light">{{userName}}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="logout()">
+          <ion-icon name="power"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
+    <div *ngIf="userDetails?.profilePic; else defaultProfile">
+      <ion-avatar>
+        <img [src]="userDetails?.profilePic" alt="profile" />
+      </ion-avatar>
+    </div>
+    <ng-template #defaultProfile>
+      <ion-avatar>
+        <img src="../../assets/profile.webp" alt="" />
+      </ion-avatar>
+    </ng-template>
+
+    <ion-item lines="none" mode="ios" class="user">
+      <ion-title>{{userDetails?.name}}</ion-title>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-text>{{userDetails?.bio}}</ion-text>
+    </ion-item>
+
+    <ion-item lines="full" class="ion-padding">
+      <ion-label slot="start">Followers </ion-label>
+      <ion-label slot="start">Following </ion-label>
+      <ion-icon
+        name="pencil-outline"
+        slot="end"
+        color="light"
+        id="profile-edit"
+      ></ion-icon>
+    </ion-item>
+    <ion-modal
+      #modal
+      trigger="profile-edit"
+      [initialBreakpoint]="1"
+      [breakpoints]="[0, 0.25, 0.5, 0.75,1]"
+    >
+      <ng-template>
+       <ion-header>
+        <ion-toolbar>
+          <ion-title>
+            Edit Profile
+          </ion-title>
+        </ion-toolbar>
+       </ion-header>
+        <ion-content class="ion-padding">
+          <form #profileForm="ngForm" (ngSubmit)="updateProfile()">
+            <ion-list class="ion-padding">
+              <ion-item lines="full" class="ion-padding">
+              
+                <ion-input
+                  type="file"
+                  label="Profile picture"
+                  color="light"
+                  (change)="uploadFile($event)"
+                ></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input
+                  label="Username"
+                  labelPlacement="floating"
+                  required
+                  [(ngModel)]="editableUserDetails.username"
+                  name="username"
+                  #usernameInput="ngModel"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="ion-padding"
+                *ngIf="usernameInput.invalid && (usernameInput.dirty || usernameInput.touched)"
+              >
+                <ion-note color="danger">Username is required.</ion-note>
+              </div>
+              <ion-item>
+                <ion-input
+                  label="Name"
+                  labelPlacement="floating"
+                  required
+                  [(ngModel)]="editableUserDetails.name"
+                  name="name"
+                  #nameInput="ngModel"
+                ></ion-input>
+              </ion-item>
+              <div
+                class="ion-padding"
+                *ngIf="nameInput.invalid && (nameInput.dirty || nameInput.touched)"
+              >
+                <ion-note color="danger">Name is required.</ion-note>
+              </div>
+              <ion-item>
+                <ion-textarea
+                  label="Bio"
+                  labelPlacement="floating"
+                  [(ngModel)]="editableUserDetails.bio"
+                  name="bio"
+                ></ion-textarea>
+              </ion-item>
+            </ion-list>
+          </form>
+        </ion-content>
+        <ion-footer>
+          <ion-button
+            expand="block"
+            color="tertiary"
+            class="ion-padding"
+            type="submit"
+            [disabled]="profileForm.invalid"
+            (click)="updateProfile()"
+          >
+            Update
+          </ion-button>
+        </ion-footer>
+      </ng-template>
+    </ion-modal>
+  </ion-header>
+
+  <div class="ion-padding">
+    <ion-segment
+      value="Your-Posts"
+      mode="ios"
+      (ionChange)="segmentChange($event)"
+    >
+      <ion-segment-button value="Your-Posts">
+        <ion-label>Your Post</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="Saved-Posts">
+        <ion-label>Saved Post</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <ion-grid>
+      <ion-row *ngIf="segmentValue === 'Your-Posts'">
+        <ion-col size="6" *ngFor="let post of ThisUserPosts">
+          <ion-card>
+            <ion-img [src]="post.postLink"></ion-img>
+            <ion-button fill="clear" color="medium">
+              <ion-icon name="heart" color="danger"></ion-icon>
+              <span>{{ post.likes }}</span>
+            </ion-button>
+            <ion-button fill="clear" (click)="openCommentModal(post.id)">
+              <ion-icon color="medium" name="chatbubble-outline"></ion-icon>
+            </ion-button>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+      
+      <ion-row *ngIf="segmentValue === 'Saved-Posts'">
+        <ion-col size="6" *ngFor="let savedPost of savedPost">
+          <img [src]="savedPost.postLink" alt="">
+          <ion-note>&#64; {{savedPost.userName}}</ion-note>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-modal
+    #modal
+    [isOpen]="isModalOpen"
+    (ionModalDidDismiss)="closeModal()"
+    [initialBreakpoint]="1"
+    [breakpoints]="[0, 0.5, 1]"
+  >
+    <ng-template>
+      <ion-header  mode="md">
+        <ion-toolbar>
+          <ion-title>Comments</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list *ngFor="let comment of postComments">
+          <ion-item class="ion-margin">
+            <ion-avatar slot="start">
+              <img [src]="comment.profilePic" alt="" />
+            </ion-avatar>
+            <ion-label>
+              <p>{{ comment.userName }}</p>
+              {{ comment.comment }}
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <form #f="ngForm" (ngSubmit)="addComment(selectedPost)">
+            <ion-item>
+              <ion-input
+                placeholder="Write comments..."
+                [(ngModel)]="comments"
+                name="comment"
+                required
+              ></ion-input>
+
+              <ion-buttons slot="end">
+                <ion-button type="submit" [disabled]="f.invalid">
+                  <ion-icon name="send-outline"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-item>
+          </form>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+  </div>
+</ion-content>

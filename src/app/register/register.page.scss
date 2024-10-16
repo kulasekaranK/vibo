@@ -1,0 +1,33 @@
+ion-content {
+  --background: url("../../assets/DarkBackground.png") no-repeat center center /
+    cover;
+
+  ion-label {
+    font-family: "League Spartan", sans-serif;
+
+    h1 {
+      font-size: 54px;
+      color: rgb(255, 255, 255);
+      margin-top: 40px;
+    }
+  }
+  ion-list {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 75vh;
+    border-top-left-radius: 46px;
+    border-top-right-radius: 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    ion-item {
+      width: 100%;
+    }
+    ion-button {
+      margin: 30px auto;
+    }
+  }
+}
