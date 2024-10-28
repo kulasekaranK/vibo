@@ -1,20 +1,30 @@
 ion-header {
   ion-toolbar {
-    --background: --ion-color-dark;
-    height: 70px;
-    display: flex;
-    align-items: center;
     ion-title {
       font-family: "League Spartan", sans-serif;
     }
   }
-}
-ion-content {
-  ion-item {
+} ion-content {
+  ion-item{
     --background: transparent;
   }
-  ion-list {
-    background: transparent;
+  .userName-label {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 90px;
   }
-
+  .location-label{
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 200px;
+  }
+  .avatar{
+    width: 90px;
+    height: 90px;
+    border: 2px solid var(--ion-color-primary);
+  }
 }

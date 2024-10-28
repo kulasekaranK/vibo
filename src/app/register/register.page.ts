@@ -40,6 +40,7 @@ export class RegisterPage implements OnInit {
   email = '';
   password = '';
   phone = '';
+
   constructor(
     private firebaseService: FirebaseService,
     private router: Router,
@@ -48,19 +49,33 @@ export class RegisterPage implements OnInit {
 
   async register() {
     try {
-     const userCredential = await this.firebaseService.createUser(this.email, this.password);
-     const uid = userCredential.user?.uid;
-     await this.firebaseService.storeUserDetails(this.name, this.phone, this.email, uid)
-      this.router.navigate(['/login']);
-    } catch {
-      const toast = this.toastController.create({
-        message: 'Enter Valid Details!',
+      const userCredential = await this.firebaseService.createUser(this.email, this.password);
+      const user = userCredential.user; 
+      const uid = user?.uid;
+
+      await this.firebaseService.storeUserDetails(this.name, this.phone, this.email, uid);
+
+      await this.firebaseService.sendVerificationEmail(user);
+
+      
+      const toast = await this.toastController.create({
+        message: 'A verification email has been sent to your email. Please verify and then login.',
         duration: 5000,
         position: 'top',
       });
-      (await toast).present();
+      await toast.present();
+
+      this.router.navigate(['/login']);
+    } catch (error) {
+      const toast = await this.toastController.create({
+        message: 'Error: ' + (error || 'Enter Valid Details!'),
+        duration: 5000,
+        position: 'top',
+      });
+      await toast.present();
     }
   }
 
   ngOnInit() {}
 }
+

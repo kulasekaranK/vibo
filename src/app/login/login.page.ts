@@ -52,22 +52,40 @@ export class LoginPage implements OnInit {
   constructor(
     private firebaseService: FirebaseService,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
   ) {}
 
-  ngOnInit() {}
   async login() {
     try {
-      await this.firebaseService.loginUser(this.email, this.password);
-      this.router.navigate(['/'],{ replaceUrl: true });
-    } catch {
-      const toast = this.toastController.create({
-        message: 'Enter Correct Email And Password!',
+      const userCredential = await this.firebaseService.loginUser(this.email, this.password);
+      const user = userCredential.user;
+
+ 
+      await this.firebaseService.reloadUser(user);
+
+
+      if (this.firebaseService.isEmailVerified(user)) {
+       
+        this.router.navigate(['/'], { replaceUrl: true });
+      } else {
+
+        const toast = await this.toastController.create({
+          message: 'Please verify your email before logging in.',
+          duration: 5000,
+          position: 'top',
+        });
+        await toast.present();
+      }
+    } catch (error) {
+      const toast = await this.toastController.create({
+        message: 'Login failed: ' + ('Invalid credentials!'),
         duration: 5000,
         position: 'top',
-        mode:'ios',
       });
-      (await toast).present();
+      await toast.present();
     }
   }
+
+  ngOnInit() {}
 }
+

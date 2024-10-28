@@ -23,9 +23,14 @@ import {
   IonFooter,
   IonInput,
   IonRefresher,
-  IonRefresherContent, IonCol, IonGrid, IonRow } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+  IonRefresherContent, 
+  IonCol, 
+  IonGrid, 
+  IonRow, 
+  IonSkeletonText 
+} from '@ionic/angular/standalone';
 
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -38,17 +43,24 @@ import {
   notificationsOutline,
   sendOutline,
   location,
-  logoGithub,
+  logoGithub, 
+  close 
 } from 'ionicons/icons';
 import { collection, query, where } from 'firebase/firestore';
-import {ToastController} from '@ionic/angular'
+import { ToastController } from '@ionic/angular';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss'],
   standalone: true,
-  imports: [IonRow, IonGrid, IonCol, 
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [
+    IonSkeletonText, 
+    IonRow, 
+    IonGrid, 
+    IonCol,
     IonRefresherContent,
     IonRefresher,
     IonInput,
@@ -73,7 +85,7 @@ import {ToastController} from '@ionic/angular'
     IonToolbar,
     IonTitle,
     IonContent,
-    ExploreContainerComponent,
+    RouterLink
   ],
 })
 export class Tab1Page implements OnInit {
@@ -84,31 +96,46 @@ export class Tab1Page implements OnInit {
   selectedPost: any = null;
   isModalOpen = false;
   userLikes: boolean = false;
+  loading: boolean = true;
+  followers: any[] = [];
 
   constructor(
     private firebaseService: FirebaseService,
     private firestore: Firestore,
     private toast: ToastController,
+    private router: Router
   ) {
     addIcons({
       notificationsOutline,
       location,
       heartOutline,
       chatbubbleOutline,
-      sendOutline,
       bookmarkOutline,
+      close,
+      sendOutline,
       chatbubblesOutline,
     });
   }
+
   async ngOnInit() {
-    await this.firebaseService.loadPost();
-    this.firebaseService.posts$.subscribe(async (posts) => {
-      this.posts = posts;
-      for (const post of this.posts) {
-        post.userLikes = await this.firebaseService.userLikeThisPost(post.id);
-        console.log(post);
+    this.loading = true;
+    const user = await this.firebaseService.getCurrentUser();
+    if (user) {
+      this.userDetails = await this.firebaseService.loadUserDetail(user.uid);
+      if (this.userDetails.following) {
+        this.followers = await this.loadFollowerDetails(this.userDetails.following);
       }
-    });
+    }
+    setTimeout(async () => {
+      await this.firebaseService.loadPost();
+      this.firebaseService.posts$.subscribe(async (posts) => {
+        this.posts = posts;
+        this.loading = false;
+        for (const post of this.posts) {
+          post.userLikes = await this.firebaseService.userLikeThisPost(post.id);
+        }
+      });
+    }, 3000);
   }
 
   doRefresh(event: any) {
@@ -117,6 +144,7 @@ export class Tab1Page implements OnInit {
       event.target.complete();
     }, 3000);
   }
+
   async openCommentModal(post: any) {
     this.selectedPost = post;
     this.isModalOpen = true;
@@ -125,18 +153,20 @@ export class Tab1Page implements OnInit {
       this.postComments = comments;
     });
   }
+
   closeModal() {
     this.isModalOpen = false;
     this.selectedPost = null;
     this.postComments = [];
   }
+
   async addComment(postId: string) {
     const user = await this.firebaseService.getCurrentUser();
     if (user) {
       this.firebaseService.postComment(user.uid, postId, this.comments);
       this.comments = '';
     }
-    this.firebaseService.loadComments('WatLSeuNfbKPph5gsqN4');
+    this.firebaseService.loadComments(postId);
   }
 
   async onLikePost(postId: string) {
@@ -147,19 +177,32 @@ export class Tab1Page implements OnInit {
       console.log('User must be logged in to like a post.');
     }
   }
-   async savePost(PostId:string){
+
+  async savePost(postId: string) {
     const user = await this.firebaseService.getCurrentUser();
-    if(user){
-      this.firebaseService.savePost(user.uid, PostId);
-    const toast = await this.toast.create({
-      message:"Post Saved",
-      duration:3000,
-      position:'top',
-
-    });
-    toast.present();
+    if (user) {
+      this.firebaseService.savePost(user.uid, postId);
+      const toast = await this.toast.create({
+        message: "Post Saved",
+        duration: 3000,
+        position: 'top',
+      });
+      toast.present();
     }
+  }
 
+  navigateToUser(uid: string) {
+    this.router.navigate(['/user', uid]);
+  }
 
-   }
+  async loadFollowerDetails(followerIds: string[]): Promise<any[]> {
+    const followerDetails: any[] = [];
+    for (const followerId of followerIds) {
+      const follower = await this.firebaseService.loadUserDetail(followerId);
+      if (follower) {
+        followerDetails.push(follower);
+      }
+    }
+    return followerDetails;
+  }
 }

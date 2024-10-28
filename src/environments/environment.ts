@@ -5,6 +5,7 @@ export const environment = {
   firebaseConfig :{
     apiKey: "AIzaSyBDetUdsMbSp08yLsPZlmeuxkyzKqshz4I",
     authDomain: "ionic-vibo-app.firebaseapp.com",
+    databaseURL: "https://ionic-vibo-app-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "ionic-vibo-app",
     storageBucket: "ionic-vibo-app.appspot.com",
     messagingSenderId: "812994031590",

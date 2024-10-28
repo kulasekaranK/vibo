@@ -3,14 +3,16 @@ import {
   Auth,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   User,
 } from '@angular/fire/auth';
-import { addDoc, Firestore } from '@angular/fire/firestore';
+import { addDoc, Firestore, collection } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import {
+  arrayRemove,
   arrayUnion,
-  collection,
   doc,
   getDoc,
   getDocs,
@@ -60,6 +62,11 @@ export class FirebaseService {
       phoneNumber,
       email,
       uid,
+      followersCount: 0,
+      followingCount: 0,
+      userName: name,
+      profilePic:
+        'https://media.istockphoto.com/id/1397556857/vector/avatar-13.jpg?s=612x612&w=0&k=20&c=n4kOY_OEVVIMkiCNOnFbCxM0yQBiKVea-ylQG62JErI=',
     });
   }
 
@@ -137,17 +144,17 @@ export class FirebaseService {
     const collectionRef = collection(this.firestore, 'savedPosts');
     const q = query(collectionRef, where('uid', '==', uid));
     const docSnap = await getDocs(q);
-  
+
     const postsWithUserDetails = await Promise.all(
-      docSnap.docs.map(async (savedDoc) => { 
-        const savedPost = savedDoc.data();       
+      docSnap.docs.map(async (savedDoc) => {
+        const savedPost = savedDoc.data();
         const postId = savedPost['postId'];
         const postDocRef = doc(this.firestore, `posts/${postId}`);
         const postDocSnap = await getDoc(postDocRef);
-        
+
         if (postDocSnap.exists()) {
           const postData = postDocSnap.data();
-  
+
           const userUid = postData['uid'];
 
           const userDetail = await this.loadUserDetail(userUid);
@@ -159,13 +166,10 @@ export class FirebaseService {
         }
       })
     );
-  
-    return postsWithUserDetails.filter(post => post !== null);
+
+    return postsWithUserDetails.filter((post) => post !== null);
   }
-  
-  
-  
-  
+
   async likePost(postId: string, userId: string): Promise<void> {
     const postRef = doc(this.firestore, 'posts', postId);
     const postSnap = await getDoc(postRef);
@@ -210,7 +214,7 @@ export class FirebaseService {
       const collectionRef = collection(this.firestore, 'posts');
       const q = query(collectionRef, where('uid', '==', uid));
       const docSnap = getDocs(q);
-      return (await docSnap).docs.map((doc) => ({id:doc.id, ...doc.data()}));
+      return (await docSnap).docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (err) {
       console.error('Error loading posts:', err);
       return null;
@@ -218,11 +222,125 @@ export class FirebaseService {
   }
   logout() {
     localStorage.removeItem('user');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { replaceUrl: true });
     return this.auth.signOut();
   }
   async savePost(uid: string, postId: string) {
     const collectionRef = collection(this.firestore, 'savedPosts');
     return await addDoc(collectionRef, { uid: uid, postId: postId });
+  }
+  async StoreNotification(notification: any) {
+    try {
+      const collectionRef = collection(this.firestore, 'Notifications');
+      await addDoc(collectionRef, {
+        title: notification.title,
+        message: notification.body,
+        timestamp: notification.timestamp,
+      });
+      console.log('Notification stored successfully');
+    } catch (error) {
+      console.error('Error storing notification: ', error);
+    }
+  }
+
+  async followUser(uid: string) {
+    const currentUser = await this.getCurrentUser();
+
+    if (!currentUser) {
+      console.error('No current user found.');
+      return;
+    }
+    const alreadyFollowing = await this.isFollowing(uid);
+
+    const userCollectionRef = collection(this.firestore, 'users');
+    const userQuery = query(userCollectionRef, where('uid', '==', uid));
+
+    const userQuerySnapshot = await getDocs(userQuery);
+
+    if (!userQuerySnapshot.empty) {
+      const userDoc = userQuerySnapshot.docs[0];
+
+      if (alreadyFollowing) {
+        await updateDoc(userDoc.ref, {
+          followersCount: increment(-1),
+          followers: arrayRemove(currentUser.uid),
+        });
+
+        const currentUserQuery = query(
+          userCollectionRef,
+          where('uid', '==', currentUser.uid)
+        );
+        const currentUserQuerySnapshot = await getDocs(currentUserQuery);
+
+        if (!currentUserQuerySnapshot.empty) {
+          const currentUserDoc = currentUserQuerySnapshot.docs[0];
+
+          await updateDoc(currentUserDoc.ref, {
+            followingCount: increment(-1),
+            following: arrayRemove(uid),
+          });
+
+          console.log('Successfully unfollowed the user.');
+        }
+      } else {
+        await updateDoc(userDoc.ref, {
+          followersCount: increment(1),
+          followers: arrayUnion(currentUser.uid),
+        });
+        const currentUserQuery = query(
+          userCollectionRef,
+          where('uid', '==', currentUser.uid)
+        );
+        const currentUserQuerySnapshot = await getDocs(currentUserQuery);
+
+        if (!currentUserQuerySnapshot.empty) {
+          const currentUserDoc = currentUserQuerySnapshot.docs[0];
+
+          await updateDoc(currentUserDoc.ref, {
+            followingCount: increment(1),
+            following: arrayUnion(uid),
+          });
+
+          console.log('Successfully followed the user.');
+        }
+      }
+    }
+  }
+
+  async isFollowing(targetUid: string): Promise<boolean> {
+    const currentUser = await this.getCurrentUser();
+    if (!currentUser || !currentUser.uid) return false;
+    const querySnapshot = await getDocs(
+      query(
+        collection(this.firestore, 'users'),
+        where('uid', '==', currentUser.uid)
+      )
+    );
+    if (querySnapshot.empty) {
+      console.error('Current user document not found.');
+      return false;
+    }
+    const followingList = querySnapshot.docs[0].data()['following'] || [];
+    return followingList.includes(targetUid);
+  }
+  async sendResetLink(email: string) {
+    console.log(email);
+    
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      console.log('Password reset email sent!');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+    }
+  }
+  sendVerificationEmail(user: User) {
+    return sendEmailVerification(user);
+  }
+  isEmailVerified(user: User): boolean {
+    return user.emailVerified;
+  }
+
+  reloadUser(user: User) {
+    return user.reload();
   }
 }

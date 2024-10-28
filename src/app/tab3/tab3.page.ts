@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Firestore } from '@angular/fire/firestore';
 import { Storage } from '@angular/fire/storage';
@@ -20,20 +20,28 @@ import {
   IonFab,
   IonFabButton,
   IonIcon,
-  IonLabel, IonText, IonButtons } from '@ionic/angular/standalone';
+  IonLabel, 
+  IonText, 
+  IonButtons, 
+  IonLoading
+} from '@ionic/angular/standalone';
 import { addDoc, collection } from 'firebase/firestore';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { addIcons } from 'ionicons';
-import { camera } from 'ionicons/icons';
+import { camera, locationOutline } from 'ionicons/icons';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
   standalone: true,
-  imports: [IonButtons, IonText, 
+  imports: [
+    IonLoading, 
+    IonButtons, 
+    IonText, 
     IonLabel,
     IonHeader,
     IonIcon,
@@ -56,24 +64,45 @@ import { camera } from 'ionicons/icons';
   ],
 })
 export class Tab3Page implements OnInit {
+  @ViewChild('postForm') postForm!: NgForm;
   selectedFile: File | null = null; 
   caption = '';
   location = '';
   userDetails: any = null;
   imagePreview: string | null = null; 
   loading: HTMLIonLoadingElement | null = null;
-
   toastMessage: string = '';
   showToast: boolean = false;
+  locationIqApiKey: string = 'pk.3a64257817134495e1b09946c4d2d0a4';
+  locationSuggestions: any[] = [];
 
   constructor(
     private FirebaseService: FirebaseService,
     private Firestore: Firestore,
     private storage: Storage,
-    private toast: ToastController  ) {
-    addIcons({ camera });
+    private toast: ToastController,
+    private loadingController: LoadingController,
+    private http: HttpClient,
+  ) {
+    addIcons({ locationOutline, camera });
   }
 
+  
+  async presentLoader() {
+    const loading = await this.loadingController.create({
+      message: 'Posting',
+      spinner: 'lines-sharp',
+      mode: 'ios',
+    });
+    await loading.present();
+    return loading;
+  }
+
+  async dismissLoader(loading: any) {
+    await loading.dismiss();
+  }
+
+  
   async ngOnInit() {
     const user = await this.FirebaseService.getCurrentUser();
     if (user) {
@@ -82,6 +111,34 @@ export class Tab3Page implements OnInit {
     console.log(this.userDetails);
   }
 
+  
+  cancel() {
+    this.imagePreview = null;
+    this.selectedFile = null;
+    this.postForm.reset();
+  }
+
+  
+  getLocationSuggestions() {
+    const input = this.location;
+    console.log(input);
+    if (input && input.trim() !== '') {
+      const url = `https://us1.locationiq.com/v1/search.php?key=${this.locationIqApiKey}&q=${input}&format=json&limit=5`;
+      this.http.get(url).subscribe((response: any) => {
+        this.locationSuggestions = response;
+      });
+    } else if (input === '') {
+      this.locationSuggestions = [];
+    }
+  }
+
+  
+  selectedLocation(location: any) {
+    this.location = location.display_name;
+    this.locationSuggestions = [];
+  }
+
+  
   async uploadFile(event: any) {
     const input = event.target as HTMLInputElement;
 
@@ -93,7 +150,6 @@ export class Tab3Page implements OnInit {
         const reader = new FileReader();
         reader.onload = () => {
           console.log(reader.result as string);
-          
           this.imagePreview = reader.result as string;
         };
         reader.readAsDataURL(file);
@@ -114,6 +170,7 @@ export class Tab3Page implements OnInit {
     }
   }
 
+  
   async takePhoto() {  
     try {  
       const image = await Camera.getPhoto({  
@@ -121,9 +178,8 @@ export class Tab3Page implements OnInit {
         source: CameraSource.Camera,  
         quality: 100,  
       });  
-      this.imagePreview = image.dataUrl!;  
+      this.imagePreview = image.dataUrl!;
       console.log(this.imagePreview);
-      
     } catch (error) {  
       console.error('Error capturing photo:', error);  
       this.toastMessage = 'Error capturing photo';
@@ -131,8 +187,10 @@ export class Tab3Page implements OnInit {
     }  
   }
 
+  
   async createPost(postForm: any) {
     try {
+      const loading = await this.presentLoader();
       if (this.imagePreview) {
         const storageRef = ref(this.storage, `posts/${new Date().getTime()}_photo.jpg`);
         const response = await fetch(this.imagePreview);
@@ -172,11 +230,11 @@ export class Tab3Page implements OnInit {
         this.toastMessage = 'Please select an image to upload';
         this.showToast = true;
       }
+      await this.dismissLoader(loading);
     } catch (err) {
       console.log(err);
       this.toastMessage = 'Oops! 😞 Something went wrong while creating your post.';
       this.showToast = true;
     }
   }
-
 }

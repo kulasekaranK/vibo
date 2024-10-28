@@ -1,9 +1,12 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title mode="ios" size="large" color="tertiary">vibo</ion-title>
-    <ion-buttons slot="end">
-      <ion-button>
+    <ion-title mode="ios" size="large" color="primary">vibo</ion-title>
+    <ion-buttons slot="end" mode="md">
+      <ion-button routerLink="/notification">
         <ion-icon name="notifications-outline" size="large"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/chat">
+        <ion-icon name="chatbubbles-outline" size="large"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -16,37 +19,133 @@
       refreshingText="Refreshing..."
     ></ion-refresher-content>
   </ion-refresher>
-  <ion-list>
-    <ion-card *ngFor="let post of posts">
+
+  <ng-container *ngIf="loading; else postsList">
+    <ion-skeleton-text
+      class="ion-margin"
+      animated
+      style="width: 40%"
+    ></ion-skeleton-text>
+    <swiper-container [slidesPerView]="3.5">
+      <swiper-slide *ngFor="let _ of [1,2,3,4]">
+        <ion-grid>
+          <ion-row class="ion-justify-content-center ion-align-items-center">
+            <ion-col size="12" class="ion-justify-content-center">
+              <ion-avatar style="width: 90px; height: 90px">
+                <ion-skeleton-text animated></ion-skeleton-text>
+              </ion-avatar>
+              <ion-skeleton-text
+                animated
+                style="width: 90%"
+              ></ion-skeleton-text>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </swiper-slide>
+    </swiper-container>
+    <ion-card *ngFor="let _ of [1, 2, 3, 4, 5]">
       <ion-card-header>
         <ion-item lines="none">
           <ion-avatar slot="start">
-            <img [src]="post.profilePic" alt="" />
+            <ion-skeleton-text
+              animated
+              style="width: 40px; height: 40px"
+            ></ion-skeleton-text>
           </ion-avatar>
           <ion-label>
-            {{ post.userName }}
-            <p><ion-icon name="location"></ion-icon> {{ post.location }}</p>
+            <ion-skeleton-text
+              animated
+              style="width: 100px"
+            ></ion-skeleton-text>
+            <p>
+              <ion-skeleton-text
+                animated
+                style="width: 80px"
+              ></ion-skeleton-text>
+            </p>
           </ion-label>
         </ion-item>
       </ion-card-header>
-      <ion-img [src]="post.postLink"></ion-img>
+      <ion-img>
+        <ion-skeleton-text
+          animated
+          style="width: 100%; height: 200px"
+        ></ion-skeleton-text>
+      </ion-img>
       <ion-card-content>
         <ion-item lines="none">
-          <ion-text>{{ post.caption }}</ion-text>
+          <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
         </ion-item>
       </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ng-template #postsList>
+    <div *ngIf="followers.length > 0" class="ion-margin-top">
+      <ion-note class="ion-margin"> People You Follow</ion-note>
+      <swiper-container [slidesPerView]="3.5">
+        <swiper-slide
+          *ngFor="let follower of followers"
+          (click)="navigateToUser(follower.uid)"
+        >
+          <ion-grid>
+            <ion-row class="ion-justify-content-center ion-align-items-center">
+              <ion-col size="12" class="ion-text-center">
+                <ion-avatar class="avatar">
+                  <img [src]="follower.profilePic" alt="Profile Picture" />
+                </ion-avatar>
+                <ion-label class="userName-label ion-margin-top"
+                  >{{follower.userName}}</ion-label
+                >
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </swiper-slide>
+      </swiper-container>
+    </div>
+
+
+    <ion-list *ngFor="let post of posts" class="ion-margin-bottom">
+      <ion-item lines="none" (click)="navigateToUser(post.uid)">
+        <ion-avatar slot="start">
+          <img [src]="post.profilePic" alt="" />
+        </ion-avatar>
+        <ion-label>
+          {{ post.userName }}
+          <p class="location-label">
+            <ion-icon name="location"></ion-icon> {{ post.location }}
+          </p>
+        </ion-label>
+      </ion-item>
+
+      <ion-img [src]="post.postLink"></ion-img>
+
+      <ion-item lines="none">
+        <ion-text>{{ post.caption }}</ion-text>
+      </ion-item>
+
       <ion-grid>
         <ion-row>
           <ion-col class="ion-text-start">
-            <ion-button fill="clear" size="large" (click)="onLikePost(post.id)" color="medium">
+            <ion-button
+              fill="clear"
+              size="large"
+              (click)="onLikePost(post.id)"
+              color="medium"
+            >
               <ion-icon
                 name="heart-outline"
                 [color]="post.userLikes ? 'danger' : 'medium'"
               ></ion-icon>
               <span>{{ post.likes }}</span>
             </ion-button>
-            <ion-button fill="clear" size="large"  (click)="openCommentModal(post)">
-              <ion-icon color="medium"  name="chatbubble-outline"></ion-icon>
+
+            <ion-button
+              fill="clear"
+              size="large"
+              (click)="openCommentModal(post)"
+            >
+              <ion-icon color="medium" name="chatbubble-outline"></ion-icon>
             </ion-button>
           </ion-col>
           <ion-col class="ion-text-end">
@@ -55,10 +154,10 @@
             </ion-button>
           </ion-col>
         </ion-row>
-        
       </ion-grid>
-    </ion-card>
-  </ion-list>
+    </ion-list>
+
+  </ng-template>
 
   <ion-modal
     #modal
@@ -66,9 +165,10 @@
     (ionModalDidDismiss)="closeModal()"
     [initialBreakpoint]="1"
     [breakpoints]="[0, 0.5, 1]"
+    [keyboardAttach]="true"
   >
     <ng-template>
-      <ion-header class="ion-margin" mode="md">
+      <ion-header mode="md">
         <ion-toolbar>
           <ion-title>Comments</ion-title>
         </ion-toolbar>
@@ -86,7 +186,7 @@
           </ion-item>
         </ion-list>
       </ion-content>
-      <ion-footer>
+      <ion-footer [keyboardAttach]="true">
         <ion-toolbar>
           <form #f="ngForm" (ngSubmit)="addComment(selectedPost.id)">
             <ion-item>
@@ -99,7 +199,7 @@
 
               <ion-buttons slot="end">
                 <ion-button type="submit" [disabled]="f.invalid">
-                  <ion-icon name="send-outline"></ion-icon>
+                  <ion-icon name="send-outline" color="medium"></ion-icon>
                 </ion-button>
               </ion-buttons>
             </ion-item>

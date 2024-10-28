@@ -1,0 +1,22 @@
+.own-message {
+    justify-content: flex-end;
+    background:  var(--ion-color-primary);
+    border-radius: 10px;
+    margin-left: auto;
+    max-width: 95%;
+    padding: 10px;
+  }
+  
+  .received-message {
+    justify-content: flex-start;
+    background:  var(--ion-color-secondary);
+    border-radius: 10px;
+    margin-right: auto;
+    max-width: 95%;
+    padding: 10px;
+  }
+  ion-note{
+    font-size: 12px;
+  }
+
+  

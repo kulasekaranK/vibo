@@ -33,21 +33,71 @@ import {
   IonNote,
   IonButtons,
   IonRefresher,
-  IonRefresherContent, IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonImg, IonCardContent } from '@ionic/angular/standalone';
+  IonRefresherContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonCard,
+  IonCardHeader,
+  IonImg,
+  IonCardContent,
+  IonBadge,
+  IonAlert,
+  IonLoading,
+  IonMenu,
+  IonMenuButton,
+  IonPopover,
+  IonProgressBar,
+  IonMenuToggle,
+  IonToggle,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { home, pencilOutline, logOut, power, heartCircleOutline, location, heartOutline, chatbubbleOutline, bookmarkOutline, heart, sendOutline } from 'ionicons/icons';
+import {
+  home,
+  pencilOutline,
+  logOut,
+  power,
+  heartCircleOutline,
+  location,
+  heartOutline,
+  chatbubbleOutline,
+  bookmarkOutline,
+  heart,
+  sendOutline,
+  text,
+  cogOutline,
+  settingsOutline,
+  logOutOutline,
+} from 'ionicons/icons';
 import { FirebaseService } from '../services/firebase.service';
 import { getDownloadURL, Storage, uploadBytes } from '@angular/fire/storage';
 import { ref } from 'firebase/storage';
 import { Firestore } from '@angular/fire/firestore';
-import { ModalController } from '@ionic/angular';
+import {
+  ModalController,
+  ToastController,
+  LoadingController,
+} from '@ionic/angular';
 
 @Component({
   selector: 'app-tab4',
   templateUrl: './tab4.page.html',
   styleUrls: ['./tab4.page.scss'],
   standalone: true,
-  imports: [IonCardContent, IonImg, IonCardHeader, IonCard, IonCol, IonRow, IonGrid, 
+  imports: [
+    IonToggle,
+    IonProgressBar,
+    IonPopover,
+    IonLoading,
+    IonAlert,
+    IonBadge,
+    IonCardContent,
+    IonImg,
+    IonCardHeader,
+    IonCard,
+    IonCol,
+    IonRow,
+    IonGrid,
     IonRefresherContent,
     IonRefresher,
     IonButtons,
@@ -72,8 +122,9 @@ import { ModalController } from '@ionic/angular';
     IonHeader,
     IonTitle,
     IonToolbar,
-    CommonModule,
-    FormsModule,
+    IonMenu,
+    IonMenuButton,
+    IonMenuToggle,
   ],
   providers: [ModalController],
 })
@@ -88,21 +139,38 @@ export class Tab4Page implements OnInit {
   selectedFile: File | null = null;
   userName = '';
   segmentValue: string = 'Your-Posts';
-  ThisUserPosts:any = null;
-  savedPost:any;
+  ThisUserPosts: any = null;
+  savedPost: any;
   selectedPost: any;
   isModalOpen: boolean = false;
   postComments: any[] | null = null;
   comments: any;
+  paletteToggle = false;
 
   constructor(
     private modalController: ModalController,
     private firebaseService: FirebaseService,
     private storage: Storage,
-    private firestore: Firestore
+    private firestore: Firestore,
+    private loadingController: LoadingController
   ) {
-    addIcons({power,pencilOutline,heart,chatbubbleOutline,sendOutline,location,heartOutline,bookmarkOutline,heartCircleOutline,logOut});
+    addIcons({
+      logOutOutline,
+      power,
+      settingsOutline,
+      heart,
+      chatbubbleOutline,
+      sendOutline,
+      cogOutline,
+      pencilOutline,
+      location,
+      heartOutline,
+      bookmarkOutline,
+      heartCircleOutline,
+      logOut,
+    });
   }
+
   doRefresh(event: any) {
     setTimeout(async () => {
       await this.ngOnInit();
@@ -110,28 +178,68 @@ export class Tab4Page implements OnInit {
     }, 3000);
   }
 
-  async ngOnInit() {
-    const user = await this.firebaseService.getCurrentUser();
-    if (user) {
-      this.userDetails = await this.firebaseService.loadUserDetail(user.uid);
-      this.editableUserDetails.name = this.userDetails.name;
-      this.editableUserDetails.username = this.userDetails.userName;
-      this.editableUserDetails.bio = this.userDetails.bio;
-      this.userName = `@ ${this.userDetails.userName}`;
-      this.ThisUserPosts = await this.firebaseService.loadSeparateUsersPost(user.uid);
-      console.log(this.ThisUserPosts);
-   this.savedPost = await this.firebaseService.loadSavedPost(user.uid);
-   console.log(this.savedPost);
-   
- 
-    }
+  async presentLoader() {
+    const loading = await this.loadingController.create({
+      spinner: 'lines-sharp',
+      mode: 'ios',
+    });
+    await loading.present();
+    return loading;
   }
+
+  async dismissLoader(loading: any) {
+    await loading.dismiss();
+  }
+
+  async ngOnInit() {
+    const loading = await this.presentLoader();
+    try {
+      const user = await this.firebaseService.getCurrentUser();
+      if (user) {
+        this.userDetails = await this.firebaseService.loadUserDetail(user.uid);
+        this.editableUserDetails.name = this.userDetails.name;
+        this.editableUserDetails.username = this.userDetails.userName;
+        this.editableUserDetails.bio = this.userDetails.bio;
+        this.userName = `@${this.userDetails.userName}`;
+        this.ThisUserPosts = await this.firebaseService.loadSeparateUsersPost(
+          user.uid
+        );
+        console.log(this.ThisUserPosts);
+        this.savedPost = await this.firebaseService.loadSavedPost(user.uid);
+        console.log(this.savedPost);
+      }
+    } catch {
+      console.log('Error occurred while loading user details');
+    } finally {
+      await this.dismissLoader(loading);
+    }
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    this.initializeDarkPalette(prefersDark.matches);
+
+    prefersDark.addEventListener('change', (mediaQuery) =>
+      this.initializeDarkPalette(mediaQuery.matches)
+    );
+  }
+  initializeDarkPalette(isDark: any) {
+    this.paletteToggle = isDark;
+    this.toggleDarkPalette(isDark);
+  }
+  toggleChange(ev: any) {
+    this.toggleDarkPalette(ev.detail.checked);
+  }
+  toggleDarkPalette(shouldAdd: any) {
+    document.documentElement.classList.toggle('ion-palette-dark', shouldAdd);
+  }
+
   uploadFile(event: any) {
     this.selectedFile = event.target.files[0];
     console.log(this.selectedFile);
   }
 
   async updateProfile() {
+    const loading = await this.presentLoader();
     const user = await this.firebaseService.getCurrentUser();
     if (user) {
       const uid = user.uid;
@@ -160,15 +268,18 @@ export class Tab4Page implements OnInit {
       await this.dismissModal();
       await this.ngOnInit();
     }
+    await this.dismissLoader(loading);
   }
+
   async dismissModal() {
     await this.modalController.dismiss();
   }
+
   segmentChange(event: any) {
     this.segmentValue = event.detail.value;
     console.log(event.detail.value);
-    
   }
+
   async openCommentModal(post: any) {
     this.selectedPost = post;
     this.isModalOpen = true;
@@ -177,21 +288,37 @@ export class Tab4Page implements OnInit {
       this.postComments = comments;
     });
   }
+
   closeModal() {
     this.isModalOpen = false;
     this.selectedPost = null;
     this.postComments = [];
   }
+
   async addComment(postId: string) {
     const user = await this.firebaseService.getCurrentUser();
     if (user) {
       this.firebaseService.postComment(user.uid, postId, this.comments);
       this.comments = '';
     }
-    this.firebaseService.loadComments('WatLSeuNfbKPph5gsqN4');
-  }
-  logout(){
-    this.firebaseService.logout();
+    this.firebaseService.loadComments(postId);
   }
 
+  public logoutButtons = [
+    {
+      text: 'Cancel',
+      role: 'cancel',
+    },
+    {
+      text: 'Confirm',
+      role: 'confirm',
+      handler: () => {
+        this.logout();
+      },
+    },
+  ];
+
+  logout() {
+    this.firebaseService.logout();
+  }
 }

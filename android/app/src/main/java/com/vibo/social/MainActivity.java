@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.vibo.social;
 
 import com.getcapacitor.BridgeActivity;
 

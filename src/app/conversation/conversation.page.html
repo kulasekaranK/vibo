@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar mode="md">
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-avatar slot="start">
+      <img [src]="userDetails?.profilePic" alt="profile" />
+    </ion-avatar>
+    <ion-title>
+      <ion-label>
+        <h1>{{userDetails?.name}}</h1>
+        <p>{{userName}}</p>
+      </ion-label>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <div *ngIf="messages.length > 0; else noMessages">
+    <ion-list>
+      <ion-item class="ion-margin" lines="none"  *ngFor="let message of messages">
+        <ion-avatar [slot]="message.senderId === currentUserDetails?.uid ? 'end' : 'start'">
+          <img [src]="message.senderAvatar" alt="" />
+        </ion-avatar>
+          <div [ngClass]="message.senderId === currentUserDetails?.uid ? 'own-message' : 'received-message'" >
+            <ion-label class="ion-margin-bottom" color="light">
+              <h2>{{ message.text }}</h2>
+            </ion-label>
+            <div class="ion-text-end">
+              <ion-note color="medium">{{ message.timestamp | date: 'shortTime' }}</ion-note>
+             </div>
+          </div>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <ng-template #noMessages>
+    <p class="ion-text-center">No messages yet.</p>
+  </ng-template>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-input
+      fill="outline"
+      placeholder="Message..."
+      name="message"
+      [(ngModel)]="newMessage"
+    >
+      <ion-button slot="end" shape="round" (click)="sendMessage()">
+        <ion-icon name="send-outline" color="light"></ion-icon>
+      </ion-button>
+    </ion-input>
+  </ion-toolbar>
+</ion-footer>

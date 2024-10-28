@@ -1,0 +1,119 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar mode="md">
+    <ion-buttons slot="start"> 
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{userName}}</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" mode="ios">
+    <ion-refresher-content refreshingSpinner="circles" refreshingText="Refreshing..."></ion-refresher-content>
+  </ion-refresher>
+  <ion-loading></ion-loading>
+
+  <ion-grid>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="auto" class="ion-text-center">
+        <ion-avatar class="avatar">
+          <img [src]="userDetails?.profilePic || '../../assets/profile.webp'" />
+        </ion-avatar>
+      </ion-col>
+    </ion-row>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" class="ion-text-center">
+        <ion-text>
+          <h2>{{userDetails?.name}}</h2>
+          <p>{{userDetails?.bio}}</p>
+        </ion-text>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="ion-justify-content-around ion-padding-vertical">
+      <ion-col size="4" class="ion-text-center">
+        <ion-text>Followers</ion-text>
+        <p>{{userDetails?.followersCount}}</p>
+      </ion-col>
+      <ion-col size="4" class="ion-text-center">
+        <ion-text>Following</ion-text>
+        <p>{{userDetails?.followingCount}}</p>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col size="6" class="ion-text-center">
+        <ion-button expand="block" (click)="followUser(userDetails?.uid)">
+          {{ isFollowing ? 'Following' : 'Follow' }}
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" color="secondary" (click)="navigateChat(userDetails.uid)">Message</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-row *ngIf="ThisUserPosts.length > 0; else noPosts">
+    <ion-col size="6" *ngFor="let post of ThisUserPosts">
+      <ion-card mode="ios" class="post-card">
+        <ion-img [src]="post.postLink" class="post-image"></ion-img>
+        <div class="post-overlay">
+          <ion-button fill="clear" size="large" (click)="onLikePost(post.id)" color="medium">
+            <ion-icon
+              name="heart-outline"
+              [color]="post.userLikes ? 'danger' : 'medium'"
+            ></ion-icon>
+            <span>{{ post.likes }}</span>
+          </ion-button>
+          <ion-button fill="clear" (click)="openCommentModal(post.id)">
+            <ion-icon color="medium" name="chatbubble-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+
+  <ng-template #noPosts>
+    <ion-row>
+      <ion-col size="12" class="ion-text-center">
+        <p>No posts available</p>
+      </ion-col>
+    </ion-row>
+  </ng-template>
+
+  <ion-modal #modal [isOpen]="isModalOpen" (ionModalDidDismiss)="closeModal()" [initialBreakpoint]="1" [breakpoints]="[0, 0.5, 1]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Comments</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list *ngFor="let comment of postComments">
+          <ion-item>
+            <ion-avatar slot="start">
+              <img [src]="comment.profilePic" alt="" />
+            </ion-avatar>
+            <ion-label>
+              <p>{{ comment.userName }}</p>
+              {{ comment.comment }}
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <form #f="ngForm" (ngSubmit)="addComment(selectedPost)">
+            <ion-item>
+              <ion-input placeholder="Write comments..." [(ngModel)]="comments" name="comment" required></ion-input>
+              <ion-buttons slot="end">
+                <ion-button type="submit" [disabled]="f.invalid">
+                  <ion-icon name="send-outline" color="medium"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-item>
+          </form>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+</ion-content>
