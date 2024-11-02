@@ -20,12 +20,12 @@ import {
   IonFab,
   IonFabButton,
   IonIcon,
-  IonLabel, 
-  IonText, 
-  IonButtons, 
+  IonLabel,
+  IonText,
+  IonButtons,
   IonLoading
 } from '@ionic/angular/standalone';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { ToastController, LoadingController } from '@ionic/angular';
 import { getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
@@ -39,9 +39,9 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['tab3.page.scss'],
   standalone: true,
   imports: [
-    IonLoading, 
-    IonButtons, 
-    IonText, 
+    IonLoading,
+    IonButtons,
+    IonText,
     IonLabel,
     IonHeader,
     IonIcon,
@@ -65,11 +65,11 @@ import { HttpClient } from '@angular/common/http';
 })
 export class Tab3Page implements OnInit {
   @ViewChild('postForm') postForm!: NgForm;
-  selectedFile: File | null = null; 
+  selectedFile: File | null = null;
   caption = '';
   location = '';
   userDetails: any = null;
-  imagePreview: string | null = null; 
+  imagePreview: string | null = null;
   loading: HTMLIonLoadingElement | null = null;
   toastMessage: string = '';
   showToast: boolean = false;
@@ -87,7 +87,7 @@ export class Tab3Page implements OnInit {
     addIcons({ locationOutline, camera });
   }
 
-  
+
   async presentLoader() {
     const loading = await this.loadingController.create({
       message: 'Posting',
@@ -102,23 +102,22 @@ export class Tab3Page implements OnInit {
     await loading.dismiss();
   }
 
-  
+
   async ngOnInit() {
     const user = await this.FirebaseService.getCurrentUser();
     if (user) {
       this.userDetails = await this.FirebaseService.loadUserDetail(user.uid);
     }
-    console.log(this.userDetails);
   }
 
-  
+
   cancel() {
     this.imagePreview = null;
     this.selectedFile = null;
     this.postForm.reset();
   }
 
-  
+
   getLocationSuggestions() {
     const input = this.location;
     console.log(input);
@@ -132,13 +131,13 @@ export class Tab3Page implements OnInit {
     }
   }
 
-  
+
   selectedLocation(location: any) {
     this.location = location.display_name;
     this.locationSuggestions = [];
   }
 
-  
+
   async uploadFile(event: any) {
     const input = event.target as HTMLInputElement;
 
@@ -170,24 +169,24 @@ export class Tab3Page implements OnInit {
     }
   }
 
-  
-  async takePhoto() {  
-    try {  
-      const image = await Camera.getPhoto({  
-        resultType: CameraResultType.DataUrl,  
-        source: CameraSource.Camera,  
-        quality: 100,  
-      });  
+
+  async takePhoto() {
+    try {
+      const image = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        quality: 100,
+      });
       this.imagePreview = image.dataUrl!;
       console.log(this.imagePreview);
-    } catch (error) {  
-      console.error('Error capturing photo:', error);  
+    } catch (error) {
+      console.error('Error capturing photo:', error);
       this.toastMessage = 'Error capturing photo';
-      this.showToast = true;  
-    }  
+      this.showToast = true;
+    }
   }
 
-  
+
   async createPost(postForm: any) {
     try {
       const loading = await this.presentLoader();
@@ -195,15 +194,15 @@ export class Tab3Page implements OnInit {
         const storageRef = ref(this.storage, `posts/${new Date().getTime()}_photo.jpg`);
         const response = await fetch(this.imagePreview);
         console.log(response);
-        
+
         const blob = await response.blob();
         console.log(blob);
-        
+
         await uploadBytes(storageRef, blob);
-  
+
         const postLink = await getDownloadURL(storageRef);
         const collectionRef = collection(this.Firestore, 'posts');
-  
+
         await addDoc(collectionRef, {
           postLink: postLink,
           caption: this.caption,
@@ -211,6 +210,7 @@ export class Tab3Page implements OnInit {
           uid: this.userDetails.uid,
           likes: 0,
           comments: 0,
+          createdAt: serverTimestamp(),
         });
 
         postForm.resetForm();
@@ -223,7 +223,7 @@ export class Tab3Page implements OnInit {
         if (fileInput) {
           fileInput.value = '';
         }
-        
+
         this.toastMessage = 'Post Created Successfully! 🎉';
         this.showToast = true;
       } else {

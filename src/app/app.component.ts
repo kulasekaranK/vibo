@@ -11,38 +11,37 @@ register();
   standalone: true,
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   constructor() {
     this.initializeApp();
     this.setAppTheme();
   }
 
-  async initializeApp() {
-    this.setStatusBarTheme();
-
-    window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', (e) => {
-        this.setStatusBarTheme(e.matches);
-      });
+  ngOnInit() {
+    const observer = new MutationObserver(() => {
+      this.setStatusBarTheme();
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
   }
 
-  async setStatusBarTheme(
-    isDark: boolean = window.matchMedia('(prefers-color-scheme: dark)').matches
-  ) {
+  async initializeApp() {
+    this.setStatusBarTheme();
+  }
+
+  async setStatusBarTheme() {
+    const isDark =
+      document.documentElement.classList.contains('ion-palette-dark');
     if (isDark) {
       await StatusBar.setBackgroundColor({ color: '#0e101d' });
       await StatusBar.setStyle({ style: Style.Dark });
-
-      document.documentElement.classList.add('ion-palette-dark');
     } else {
       await StatusBar.setBackgroundColor({ color: '#f3f4ff' });
       await StatusBar.setStyle({ style: Style.Light });
-
-      document.documentElement.classList.remove('ion-palette-dark');
     }
   }
-
   setAppTheme() {
     document.documentElement.classList.toggle('ion-palette-dark');
   }

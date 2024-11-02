@@ -1,8 +1,9 @@
 ion-header {
   ion-toolbar {
-    ion-title {
-      font-family: "League Spartan", sans-serif;
-    }
+    --min-height: 60px;
+    --padding-top: 20px;
+    --padding-bottom: 20px;
+    font-family: "Miltonian Tattoo", serif;
   }
 } ion-content {
   ion-item{
@@ -28,8 +29,5 @@ ion-header {
     border: 2px solid var(--ion-color-primary);
     padding: 3px;
   }
-  ion-button{
-  text-transform: lowercase;
 
-  }
 }

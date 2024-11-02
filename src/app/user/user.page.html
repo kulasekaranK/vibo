@@ -53,25 +53,32 @@
     </ion-row>
   </ion-grid>
 
-  <ion-row *ngIf="ThisUserPosts.length > 0; else noPosts">
-    <ion-col size="6" *ngFor="let post of ThisUserPosts">
-      <ion-card mode="ios" class="post-card">
-        <ion-img [src]="post.postLink" class="post-image"></ion-img>
-        <div class="post-overlay">
-          <ion-button fill="clear" size="large" (click)="onLikePost(post.id)" color="dark">
-            <ion-icon
-              name="heart-outline"
-              [color]="post.userLikes ? 'primary' : 'dark'"
-            ></ion-icon>
-            <span>{{ post.likes }}</span>
-          </ion-button>
-          <ion-button fill="clear" (click)="openCommentModal(post.id)">
-            <ion-icon color="dark" name="chatbubble-outline"></ion-icon>
-          </ion-button>
-        </div>
-      </ion-card>
-    </ion-col>
-  </ion-row>
+<ion-row *ngIf="ThisUserPosts.length > 0; else noPosts">
+  <ion-col size="6" *ngFor="let post of ThisUserPosts">
+    <ion-card mode="ios" class="post-card">
+      <ion-img [src]="post.postLink" class="post-image"></ion-img>
+      <div class="post-overlay">
+        <ion-button
+          fill="clear"
+          size="large"
+          (click)="onToggleLikePost(post)"
+          color="dark"
+          type="button"
+        >
+          <ion-icon
+            [name]="post.userLikes ? 'heart' : 'heart-outline'"
+            [color]="post.userLikes ? 'primary' : 'dark'"
+          ></ion-icon>
+          <span>{{ post.likes }}</span>
+        </ion-button>
+        <ion-button fill="clear" (click)="openCommentModal(post.id)">
+          <ion-icon color="dark" name="chatbubble-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-card>
+  </ion-col>
+</ion-row>
+
 
   <ng-template #noPosts>
     <ion-row>

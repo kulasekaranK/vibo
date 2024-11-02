@@ -29,7 +29,9 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonRippleEffect,
-  IonBackButton, IonLoading } from '@ionic/angular/standalone';
+  IonBackButton,
+  IonLoading,
+} from '@ionic/angular/standalone';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
 import { addIcons } from 'ionicons';
@@ -39,14 +41,15 @@ import {
   sendOutline,
   heartOutline,
 } from 'ionicons/icons';
-import {LoadingController} from '@ionic/angular'
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.page.html',
   styleUrls: ['./user.page.scss'],
   standalone: true,
-  imports: [IonLoading, 
+  imports: [
+    IonLoading,
     IonBackButton,
     IonRippleEffect,
     IonRefresherContent,
@@ -77,7 +80,7 @@ import {LoadingController} from '@ionic/angular'
     IonToolbar,
     CommonModule,
     FormsModule,
-    RouterLink
+    RouterLink,
   ],
 })
 export class UserPage implements OnInit {
@@ -94,8 +97,8 @@ export class UserPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private firebaseService: FirebaseService,
-    private loadingController:LoadingController,
-    private router: Router,
+    private loadingController: LoadingController,
+    private router: Router
   ) {
     addIcons({ heartOutline, chatbubbleOutline, sendOutline, heart });
   }
@@ -115,7 +118,6 @@ export class UserPage implements OnInit {
   async ngOnInit() {
     const loading = await this.presentLoader();
     const uid = this.route.snapshot.paramMap.get('uid');
-    console.log(uid);
 
     if (uid) {
       this.userDetails = await this.firebaseService.loadUserDetail(uid);
@@ -130,6 +132,7 @@ export class UserPage implements OnInit {
         console.log(post);
       }
     }
+
     await this.dismissLoader(loading);
   }
 
@@ -164,17 +167,16 @@ export class UserPage implements OnInit {
     }
     this.firebaseService.loadComments('WatLSeuNfbKPph5gsqN4');
   }
-  async onLikePost(postId: string) {
-    const user = await this.firebaseService.getCurrentUser();
-    if (user) {
-      await this.firebaseService.likePost(postId, user.uid);
-    } else {
-      console.log('User must be logged in to like a post.');
+  async onToggleLikePost(post: any) {
+    const userUid = this.userDetails.uid;
+    if (!userUid) {
+      console.log('User must be logged in to like or unlike a post.');
+      return;
     }
+    await this.firebaseService.toggleLikePost(post.id, userUid);
+   await this.ngOnInit();
   }
-  navigateChat(uid:string){
-   console.log(uid);
-   this.router.navigate(['/conversation',uid])
-   
+  navigateChat(uid: string) {
+    this.router.navigate(['/conversation', uid]);
   }
 }

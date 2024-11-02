@@ -11,9 +11,9 @@ import { Observable } from 'rxjs';
   templateUrl: './notification.page.html',
   styleUrls: ['./notification.page.scss'],
   standalone: true,
-  imports: [IonNote, IonLabel, 
-    IonItem, IonList, IonFooter, IonButtons, IonButton, IonBackButton, IonContent, IonHeader, IonTitle, IonToolbar, 
-    CommonModule, FormsModule, TabsPage, 
+  imports: [IonNote, IonLabel,
+    IonItem, IonList, IonFooter, IonButtons, IonButton, IonBackButton, IonContent, IonHeader, IonTitle, IonToolbar,
+    CommonModule, FormsModule, TabsPage,
   ]
 })
 export class NotificationPage implements OnInit {
@@ -23,12 +23,11 @@ export class NotificationPage implements OnInit {
 
   ngOnInit() {
     const collectionRef = collection(this.firestore, 'Notifications');
-    
+
     this.notifications$ = collectionData(collectionRef, { idField: 'id' });
     this.notifications$.subscribe((val)=>{
-      console.log(val);
-      
+
     })
-    
+
   }
 }

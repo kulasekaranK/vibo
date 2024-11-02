@@ -81,8 +81,11 @@
   </ng-container>
 
   <ng-template #postsList>
-    <div *ngIf="followers.length > 0" class="ion-margin-top">
-      <ion-note class="ion-margin"> People You Follow</ion-note>
+    <div
+      *ngIf="followers.length > 0; else followSuggestions"
+      class="ion-margin-top"
+    >
+      <ion-note class="ion-margin">People You Follow</ion-note>
       <swiper-container [slidesPerView]="3.5">
         <swiper-slide
           *ngFor="let follower of followers"
@@ -103,8 +106,33 @@
         </swiper-slide>
       </swiper-container>
     </div>
+    <ng-template #followSuggestions>
+      <ion-note class="ion-margin">Follow Suggestions</ion-note>
+      <swiper-container [slidesPerView]="3.5">
+        <swiper-slide
+          *ngFor="let suggestion of followSuggestionsList"
+          (click)="navigateToUser(suggestion.uid)"
+        >
+          <ion-grid>
+            <ion-row class="ion-justify-content-center ion-align-items-center">
+              <ion-col size="12" class="ion-text-center">
+                <ion-avatar class="avatar">
+                  <img [src]="suggestion.profilePic" alt="Profile Picture" />
+                </ion-avatar>
+                <ion-label class="userName-label ion-margin-top"
+                  >{{suggestion.userName}}</ion-label
+                >
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </swiper-slide>
+      </swiper-container>
+    </ng-template>
 
-    <ion-list *ngFor="let post of posts" class="ion-margin-bottom">
+    <ion-list
+      *ngFor="let post of posts; trackBy: trackPostById"
+      class="ion-margin-bottom"
+    >
       <ion-item lines="none" (click)="navigateToUser(post.uid)">
         <ion-avatar slot="start">
           <img [src]="post.profilePic" alt="" />
@@ -124,7 +152,7 @@
           (click)="followUser(post.uid, post, $event)"
           [ngStyle]="{'text-transform': 'none'}"
         >
-        {{ post.isFollowing ? 'Following' : 'Follow' }}
+          {{ post.isFollowing ? 'Following' : 'Follow' }}
         </ion-button>
       </ion-item>
 
@@ -140,11 +168,12 @@
             <ion-button
               fill="clear"
               size="large"
-              (click)="onLikePost(post.id)"
+              (click)="onToggleLikePost(post.id, $event)"
               color="dark"
+              type="button"
             >
               <ion-icon
-                name="heart-outline"
+                [name]="post.userLikes ? 'heart' : 'heart-outline'"
                 [color]="post.userLikes ? 'primary' : 'dark'"
               ></ion-icon>
               <span>{{ post.likes }}</span>

@@ -1,5 +1,5 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar >
+  <ion-toolbar>
     <ion-title mode="md">Search Users</ion-title>
     <ion-progress-bar type="indeterminate" *ngIf="isLoading"></ion-progress-bar>
   </ion-toolbar>
@@ -15,7 +15,10 @@
   ></ion-searchbar>
 
   <ion-list *ngIf="filteredUsers.length > 0">
-    <ion-item *ngFor="let user of filteredUsers" (click)="navigateToUser(user.uid)">
+    <ion-item
+      *ngFor="let user of filteredUsers"
+      (click)="navigateToUser(user.uid)"
+    >
       <ion-avatar slot="start">
         <img [src]="user.profilePic" alt="Profile Picture" />
       </ion-avatar>
@@ -26,8 +29,6 @@
     </ion-item>
   </ion-list>
 
-
-
   <ion-grid *ngIf="searchTerm && filteredUsers.length === 0">
     <ion-row>
       <ion-col class="ion-text-center">
@@ -35,5 +36,31 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-
+  <ion-grid class="ion-text-center">
+    <ion-note>Fresh Faces on Vibo</ion-note>
+    <ion-row>
+      <ion-col
+        size="6"
+        *ngFor="let users of followSuggestionsList"
+        class="ion-text-center"
+      >
+        <ion-card class="ion-padding">
+          <ion-avatar class="avatar">
+            <img [src]="users.profilePic" alt="" />
+          </ion-avatar>
+          <ion-label color="dark">{{users.name}}</ion-label><br>
+          <ion-note >{{users.userName}}</ion-note><br />
+          <ion-button
+            size="small"
+            class="ion-margin-top"
+            color="primary"
+            shape="round"
+            [ngStyle]="{'text-transform': 'none'}"
+            (click)="navigateToUser(users.uid)"
+            >View</ion-button
+          >
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

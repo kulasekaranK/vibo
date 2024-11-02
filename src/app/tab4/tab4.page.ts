@@ -204,9 +204,8 @@ export class Tab4Page implements OnInit {
         this.ThisUserPosts = await this.firebaseService.loadSeparateUsersPost(
           user.uid
         );
-        console.log(this.ThisUserPosts);
         this.savedPost = await this.firebaseService.loadSavedPost(user.uid);
-        console.log(this.savedPost);
+
       }
     } catch {
       console.log('Error occurred while loading user details');

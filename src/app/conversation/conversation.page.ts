@@ -15,11 +15,21 @@ import {
   IonFooter,
   IonInput,
   IonItem,
-  IonIcon, IonList, IonBadge, IonProgressBar, IonText } from '@ionic/angular/standalone';
+  IonIcon,
+  IonList,
+  IonBadge,
+  IonProgressBar,
+  IonText,
+} from '@ionic/angular/standalone';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
 import { addIcons } from 'ionicons';
-import { atOutline, personSharp, sendOutline, ellipsisVerticalOutline } from 'ionicons/icons';
+import {
+  atOutline,
+  personSharp,
+  sendOutline,
+  ellipsisVerticalOutline,
+} from 'ionicons/icons';
 import {
   Database,
   onValue,
@@ -34,7 +44,11 @@ import {
   templateUrl: './conversation.page.html',
   styleUrls: ['./conversation.page.scss'],
   standalone: true,
-  imports: [IonText, IonProgressBar, IonBadge, IonList,
+  imports: [
+    IonText,
+    IonProgressBar,
+    IonBadge,
+    IonList,
     IonIcon,
     IonItem,
     IonInput,
@@ -52,7 +66,7 @@ import {
     CommonModule,
     FormsModule,
     FormsModule,
-    CommonModule
+    CommonModule,
   ],
 })
 export class ConversationPage implements OnInit {
@@ -61,26 +75,27 @@ export class ConversationPage implements OnInit {
   currentUserDetails: any = null;
   newMessage: string = '';
   messages: any[] = [];
-
+  private lastSentMessageKey: string | null = null;
   constructor(
     private route: ActivatedRoute,
     private firebaseService: FirebaseService,
     private database: Database,
     private router: Router
   ) {
-    addIcons({personSharp,ellipsisVerticalOutline,sendOutline});
+    addIcons({ personSharp, ellipsisVerticalOutline, sendOutline });
   }
 
   async ngOnInit() {
     const uid = this.route.snapshot.paramMap.get('uid');
-    console.log(uid);
     if (uid) {
       this.userDetails = await this.firebaseService.loadUserDetail(uid);
       this.userName = `@${this.userDetails.userName}`;
     }
     const currentUser = await this.firebaseService.getCurrentUser();
-    if(currentUser){
-      this.currentUserDetails = await this.firebaseService.loadUserDetail(currentUser.uid);
+    if (currentUser) {
+      this.currentUserDetails = await this.firebaseService.loadUserDetail(
+        currentUser.uid
+      );
     }
 
     if (this.currentUserDetails && uid) {
@@ -111,16 +126,19 @@ export class ConversationPage implements OnInit {
 
     const messagesRef = ref(this.database, `chats/${chatId}/messages`);
 
+    // Push a new message
     const newMessageRef = push(messagesRef);
-    set(newMessageRef, {
+    await set(newMessageRef, {
       senderId: currentUserId,
-      receiverId: this.userDetails.uid,
+      receiverId: otherUserId,
       senderName: senderName,
       senderAvatar: senderAvatar,
       text: this.newMessage,
       timestamp: serverTimestamp(),
-      read:false,
+      read: false,
     });
+
+    this.lastSentMessageKey = newMessageRef.key;
 
     this.newMessage = '';
   }

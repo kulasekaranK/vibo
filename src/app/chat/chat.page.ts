@@ -13,7 +13,10 @@ import {
   IonAvatar,
   IonLabel,
   IonNote,
-  IonSearchbar, IonBadge, IonText } from '@ionic/angular/standalone';
+  IonSearchbar,
+  IonBadge,
+  IonText,
+} from '@ionic/angular/standalone';
 import { FirebaseService } from '../services/firebase.service';
 import { onValue, ref, update } from 'firebase/database';
 import { Router } from '@angular/router';
@@ -114,14 +117,12 @@ export class ChatPage implements OnInit {
         }
       }
       this.chatList = Object.values(chatMap);
-      console.log(this.chatList);
 
       this.filteredChatList = this.chatList;
     });
   }
 
   openChat(uid: string, chatId: any) {
-    this.updateReadStatus(chatId);
     this.updateReadStatus(chatId);
     this.router.navigate(['/conversation', uid]);
   }
@@ -134,12 +135,17 @@ export class ChatPage implements OnInit {
       if (messages) {
         const messageKeys = Object.keys(messages);
         const lastMessageKey = messageKeys[messageKeys.length - 1];
-        await update(
-          ref(this.database, `chats/${chatId}/messages/${lastMessageKey}`),
-          {
-            read: true,
-          }
-        );
+        const lastMessage = messages[lastMessageKey];
+
+        // Only update read status if it's not already true
+        if (!lastMessage.read) {
+          await update(
+            ref(this.database, `chats/${chatId}/messages/${lastMessageKey}`),
+            {
+              read: true,
+            }
+          );
+        }
       }
     });
   }

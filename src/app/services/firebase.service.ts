@@ -8,12 +8,15 @@ import {
   signInWithEmailAndPassword,
   User,
 } from '@angular/fire/auth';
-import { addDoc, Firestore, collection } from '@angular/fire/firestore';
+import { addDoc, Firestore, collection,runTransaction } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import {
   arrayRemove,
   arrayUnion,
   doc,
+  DocumentData,
+  DocumentReference,
+  FieldValue,
   getDoc,
   getDocs,
   increment,
@@ -105,12 +108,20 @@ export class FirebaseService {
             return { id: doc.id, ...postData, ...userDetails };
           })
         );
+
+        posts.sort((a, b) => {
+          const dateA = a.createdAt?.toMillis() || 0;
+          const dateB = b.createdAt?.toMillis() || 0;
+          return dateB - dateA;
+        });
+
         this.postsSubject.next(posts);
       });
     } catch (err) {
       console.error('Error loading posts:', err);
     }
   }
+
   async postComment(uid: string, postId: string, comment: string) {
     const collectionRef = collection(this.firestore, 'comments');
     return await addDoc(collectionRef, {
@@ -169,27 +180,47 @@ export class FirebaseService {
 
     return postsWithUserDetails.filter((post) => post !== null);
   }
-
-  async likePost(postId: string, userId: string): Promise<void> {
+  async toggleLikePost(postId: string, userId: string): Promise<void> {
     const postRef = doc(this.firestore, 'posts', postId);
-    const postSnap = await getDoc(postRef);
 
-    if (postSnap.exists()) {
-      const postData = postSnap.data();
-      const likedBy = postData['likedBy'] || [];
+    await runTransaction(this.firestore, async (transaction) => {
+      const postSnap = await transaction.get(postRef);
 
-      if (!likedBy.includes(userId)) {
-        await updateDoc(postRef, {
-          likes: increment(1),
-          likedBy: arrayUnion(userId),
+      if (postSnap.exists()) {
+        const postData = postSnap.data();
+        const likedBy = postData['likedBy'] || [];
+        const newLikesCount = likedBy.includes(userId) ? -1 : 1;
+
+        transaction.update(postRef, {
+          likes: increment(newLikesCount),
+          likedBy: likedBy.includes(userId)
+            ? arrayRemove(userId)
+            : arrayUnion(userId),
+        });
+
+        this.updatePostInState(postId, {
+          likes: postData['likes'] + newLikesCount,
+          likedBy: likedBy.includes(userId)
+            ? likedBy.filter((id: string) => id !== userId)
+            : [...likedBy, userId],
         });
       } else {
-        console.log('User has already liked this post.');
+        console.log('Post does not exist.');
       }
-    } else {
-      console.log('Post does not exist.');
-    }
+    });
   }
+
+  private updatePostInState(postId: string, updatedData: any): void {
+    const posts = this.postsSubject.getValue();
+    const updatedPosts = posts.map((post) => {
+      if (post.id === postId) {
+        return { ...post, ...updatedData };
+      }
+      return post;
+    });
+    this.postsSubject.next(updatedPosts);
+  }
+
   async getPostLikes(postId: string): Promise<any> {
     const postRef = doc(this.firestore, 'posts', postId);
     const postSnap = await getDoc(postRef);
@@ -209,17 +240,31 @@ export class FirebaseService {
     }
     return false;
   }
+
   async loadSeparateUsersPost(uid: string) {
     try {
       const collectionRef = collection(this.firestore, 'posts');
       const q = query(collectionRef, where('uid', '==', uid));
-      const docSnap = getDocs(q);
-      return (await docSnap).docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const docSnap = await getDocs(q);
+
+      const postsWithUserDetails = await Promise.all(
+        docSnap.docs.map(async (postDoc) => {
+          const postData = postDoc.data();
+
+          const userUid = postData['uid'];
+          const userDetail = await this.loadUserDetail(userUid);
+
+          return { id: postDoc.id, ...postData, ...userDetail };
+        })
+      );
+
+      return postsWithUserDetails;
     } catch (err) {
       console.error('Error loading posts:', err);
       return null;
     }
   }
+
   logout() {
     localStorage.removeItem('user');
     this.router.navigate(['/login'], { replaceUrl: true });
@@ -325,7 +370,7 @@ export class FirebaseService {
   }
   async sendResetLink(email: string) {
     console.log(email);
-    
+
     try {
       await sendPasswordResetEmail(this.auth, email);
       console.log('Password reset email sent!');

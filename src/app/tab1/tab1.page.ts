@@ -1,6 +1,6 @@
 import { FirebaseService } from './../services/firebase.service';
 import { Firestore } from '@angular/fire/firestore';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
   IonHeader,
   IonToolbar,
@@ -27,7 +27,7 @@ import {
   IonCol,
   IonGrid,
   IonRow,
-  IonSkeletonText
+  IonSkeletonText,
 } from '@ionic/angular/standalone';
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -44,9 +44,10 @@ import {
   sendOutline,
   location,
   logoGithub,
-  close
+  close,
+  heart,
 } from 'ionicons/icons';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { ToastController } from '@ionic/angular';
 import { Router, RouterLink } from '@angular/router';
 
@@ -87,6 +88,7 @@ import { Router, RouterLink } from '@angular/router';
     IonContent,
     RouterLink,
   ],
+
 })
 export class Tab1Page implements OnInit {
   posts: any[] | null = null;
@@ -98,6 +100,7 @@ export class Tab1Page implements OnInit {
   userLikes: boolean = false;
   loading: boolean = true;
   followers: any[] = [];
+  followSuggestionsList: any[] = [];
 
   constructor(
     private firebaseService: FirebaseService,
@@ -109,6 +112,7 @@ export class Tab1Page implements OnInit {
       notificationsOutline,
       location,
       heartOutline,
+      heart,
       chatbubbleOutline,
       bookmarkOutline,
       close,
@@ -117,8 +121,17 @@ export class Tab1Page implements OnInit {
     });
   }
 
+  loadSuggestions() {
+    const collectionRef = collection(this.firestore, 'users');
+    onSnapshot(collectionRef, async (snapshot) => {
+      this.followSuggestionsList = snapshot.docs.map((doc) => doc.data());
+    });
+  }
+
   async ngOnInit() {
     this.loading = true;
+    this.loadSuggestions();
+
     const user = await this.firebaseService.getCurrentUser();
     if (user) {
       this.userDetails = await this.firebaseService.loadUserDetail(user.uid);
@@ -139,6 +152,11 @@ export class Tab1Page implements OnInit {
       }
     });
   }
+
+  trackPostById(index: number, post: any): string {
+    return post.id;
+  }
+
   async followUser(uid: string, post: any, ev: Event) {
     ev.stopPropagation();
     await this.firebaseService.followUser(uid);
@@ -176,12 +194,15 @@ export class Tab1Page implements OnInit {
     this.firebaseService.loadComments(postId);
   }
 
-  async onLikePost(postId: string) {
-    const user = await this.firebaseService.getCurrentUser();
+  async onToggleLikePost(postId: string, ev: Event) {
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    const user = await this.userDetails.uid;
+
     if (user) {
-      await this.firebaseService.likePost(postId, user.uid);
+      await this.firebaseService.toggleLikePost(postId, user);
     } else {
-      console.log('User must be logged in to like a post.');
+      console.log('User must be logged in to like or unlike a post.');
     }
   }
 

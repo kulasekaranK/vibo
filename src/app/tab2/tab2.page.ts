@@ -5,23 +5,22 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonSearchbar, 
-  IonItem, 
-  IonLabel, 
-  IonAvatar, 
-  IonList, 
-  IonButton, 
-  IonButtons, 
-  IonGrid, 
-  IonRow, 
-  IonCol, 
-  IonProgressBar, 
-  IonAlert, 
-  IonToast 
-} from '@ionic/angular/standalone';
+  IonSearchbar,
+  IonItem,
+  IonLabel,
+  IonAvatar,
+  IonList,
+  IonButton,
+  IonButtons,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonProgressBar,
+  IonAlert,
+  IonToast, IonCard, IonNote } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, query, where, getDocs, onSnapshot } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 
 @Component({
@@ -29,34 +28,49 @@ import { Router } from '@angular/router';
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss'],
   standalone: true,
-  imports: [
-    IonToast, 
-    IonAlert, 
-    IonProgressBar, 
-    IonCol, 
-    IonRow, 
-    IonGrid, 
-    IonButtons, 
-    IonButton, 
-    IonList, 
-    IonAvatar, 
-    IonLabel, 
-    IonItem, 
+  imports: [IonNote, IonCard,
+    IonToast,
+    IonAlert,
+    IonProgressBar,
+    IonCol,
+    IonRow,
+    IonGrid,
+    IonButtons,
+    IonButton,
+    IonList,
+    IonAvatar,
+    IonLabel,
+    IonItem,
     IonSearchbar,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonContent,
     CommonModule,
-    FormsModule
+    FormsModule,
   ],
 })
 export class Tab2Page {
   searchTerm: string = '';
   filteredUsers: any[] = [];
   isLoading: boolean = false;
+  followSuggestionsList: any[]= [];
 
-  constructor(private firestore: Firestore, private router: Router) {}
+
+  constructor(private firestore: Firestore, private router: Router) {
+    this.loadSuggestions();
+  }
+  loadSuggestions() {
+    const collectionRef = collection(this.firestore, 'users');
+    onSnapshot(collectionRef, async (snapshot) => {
+      this.followSuggestionsList = snapshot.docs.map((doc) => doc.data());
+    for (const user of this.followSuggestionsList) {
+      user.userName = `@ ${user.userName}`
+      console.log(this.followSuggestionsList);
+
+    }
+    });
+  }
 
   async searchUsers() {
     this.isLoading = true;
@@ -77,7 +91,7 @@ export class Tab2Page {
     const querySnapshot = await getDocs(q);
 
     this.filteredUsers = [];
-    querySnapshot.forEach(doc => {
+    querySnapshot.forEach((doc) => {
       this.filteredUsers.push({ id: doc.id, ...doc.data() });
     });
 
