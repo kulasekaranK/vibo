@@ -104,7 +104,6 @@
       </swiper-container>
     </div>
 
-
     <ion-list *ngFor="let post of posts" class="ion-margin-bottom">
       <ion-item lines="none" (click)="navigateToUser(post.uid)">
         <ion-avatar slot="start">
@@ -116,6 +115,17 @@
             <ion-icon name="location"></ion-icon> {{ post.location }}
           </p>
         </ion-label>
+
+        <ion-button
+          slot="end"
+          color="primary"
+          shape="round"
+          size="default"
+          (click)="followUser(post.uid, post, $event)"
+          [ngStyle]="{'text-transform': 'none'}"
+        >
+        {{ post.isFollowing ? 'Following' : 'Follow' }}
+        </ion-button>
       </ion-item>
 
       <ion-img [src]="post.postLink"></ion-img>
@@ -131,11 +141,11 @@
               fill="clear"
               size="large"
               (click)="onLikePost(post.id)"
-              color="medium"
+              color="dark"
             >
               <ion-icon
                 name="heart-outline"
-                [color]="post.userLikes ? 'danger' : 'medium'"
+                [color]="post.userLikes ? 'primary' : 'dark'"
               ></ion-icon>
               <span>{{ post.likes }}</span>
             </ion-button>
@@ -145,18 +155,17 @@
               size="large"
               (click)="openCommentModal(post)"
             >
-              <ion-icon color="medium" name="chatbubble-outline"></ion-icon>
+              <ion-icon color="dark" name="chatbubble-outline"></ion-icon>
             </ion-button>
           </ion-col>
           <ion-col class="ion-text-end">
             <ion-button fill="clear" (click)="savePost(post.id)" size="large">
-              <ion-icon color="medium" name="bookmark-outline"></ion-icon>
+              <ion-icon color="dark" name="bookmark-outline"></ion-icon>
             </ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
     </ion-list>
-
   </ng-template>
 
   <ion-modal
@@ -199,7 +208,7 @@
 
               <ion-buttons slot="end">
                 <ion-button type="submit" [disabled]="f.invalid">
-                  <ion-icon name="send-outline" color="medium"></ion-icon>
+                  <ion-icon name="send-outline" color="primary"></ion-icon>
                 </ion-button>
               </ion-buttons>
             </ion-item>

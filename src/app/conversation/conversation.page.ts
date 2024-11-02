@@ -16,10 +16,10 @@ import {
   IonInput,
   IonItem,
   IonIcon, IonList, IonBadge, IonProgressBar, IonText } from '@ionic/angular/standalone';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
 import { addIcons } from 'ionicons';
-import { atOutline, sendOutline } from 'ionicons/icons';
+import { atOutline, personSharp, sendOutline, ellipsisVerticalOutline } from 'ionicons/icons';
 import {
   Database,
   onValue,
@@ -34,7 +34,7 @@ import {
   templateUrl: './conversation.page.html',
   styleUrls: ['./conversation.page.scss'],
   standalone: true,
-  imports: [IonText, IonProgressBar, IonBadge, IonList, 
+  imports: [IonText, IonProgressBar, IonBadge, IonList,
     IonIcon,
     IonItem,
     IonInput,
@@ -65,9 +65,10 @@ export class ConversationPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private firebaseService: FirebaseService,
-    private database: Database
+    private database: Database,
+    private router: Router
   ) {
-    addIcons({ sendOutline });
+    addIcons({personSharp,ellipsisVerticalOutline,sendOutline});
   }
 
   async ngOnInit() {
@@ -89,7 +90,7 @@ export class ConversationPage implements OnInit {
 
   loadMessages(currentUserId: string, otherUserId: string) {
     const chatId = this.getChatId(currentUserId, otherUserId);
-    
+
     const messagesRef = ref(this.database, `chats/${chatId}/messages`);
 
     onValue(messagesRef, (snapshot) => {
@@ -113,10 +114,12 @@ export class ConversationPage implements OnInit {
     const newMessageRef = push(messagesRef);
     set(newMessageRef, {
       senderId: currentUserId,
+      receiverId: this.userDetails.uid,
       senderName: senderName,
       senderAvatar: senderAvatar,
       text: this.newMessage,
       timestamp: serverTimestamp(),
+      read:false,
     });
 
     this.newMessage = '';

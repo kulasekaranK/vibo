@@ -15,7 +15,7 @@
         <ion-title class="ion-text-center" size="large" mode="md">Login</ion-title>
       </ion-item>
 
-   
+
       <ion-item>
         <ion-input
           label="Email"
@@ -29,7 +29,7 @@
         ></ion-input>
       </ion-item>
 
-  
+
       <ion-item *ngIf="emailCtrl.invalid && emailCtrl.touched" lines="none">
         <ion-label color="danger" >
           <p *ngIf="emailCtrl.errors?.['required']">Email is required!</p>
@@ -70,7 +70,7 @@
 
       <ion-item lines="none">
         <ion-button
-          color="tertiary"
+          color="primary"
           size="default"
           expand="block"
           type="submit"

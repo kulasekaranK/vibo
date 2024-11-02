@@ -23,11 +23,11 @@ import {
   IonFooter,
   IonInput,
   IonRefresher,
-  IonRefresherContent, 
-  IonCol, 
-  IonGrid, 
-  IonRow, 
-  IonSkeletonText 
+  IonRefresherContent,
+  IonCol,
+  IonGrid,
+  IonRow,
+  IonSkeletonText
 } from '@ionic/angular/standalone';
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -43,8 +43,8 @@ import {
   notificationsOutline,
   sendOutline,
   location,
-  logoGithub, 
-  close 
+  logoGithub,
+  close
 } from 'ionicons/icons';
 import { collection, query, where } from 'firebase/firestore';
 import { ToastController } from '@ionic/angular';
@@ -57,9 +57,9 @@ import { Router, RouterLink } from '@angular/router';
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
-    IonSkeletonText, 
-    IonRow, 
-    IonGrid, 
+    IonSkeletonText,
+    IonRow,
+    IonGrid,
     IonCol,
     IonRefresherContent,
     IonRefresher,
@@ -85,7 +85,7 @@ import { Router, RouterLink } from '@angular/router';
     IonToolbar,
     IonTitle,
     IonContent,
-    RouterLink
+    RouterLink,
   ],
 })
 export class Tab1Page implements OnInit {
@@ -123,19 +123,26 @@ export class Tab1Page implements OnInit {
     if (user) {
       this.userDetails = await this.firebaseService.loadUserDetail(user.uid);
       if (this.userDetails.following) {
-        this.followers = await this.loadFollowerDetails(this.userDetails.following);
+        this.followers = await this.loadFollowerDetails(
+          this.userDetails.following
+        );
       }
     }
-    setTimeout(async () => {
-      await this.firebaseService.loadPost();
-      this.firebaseService.posts$.subscribe(async (posts) => {
-        this.posts = posts;
-        this.loading = false;
-        for (const post of this.posts) {
-          post.userLikes = await this.firebaseService.userLikeThisPost(post.id);
-        }
-      });
-    }, 3000);
+
+    await this.firebaseService.loadPost();
+    this.firebaseService.posts$.subscribe(async (posts) => {
+      this.posts = posts;
+      this.loading = false;
+      for (const post of this.posts) {
+        post.userLikes = await this.firebaseService.userLikeThisPost(post.id);
+        post.isFollowing = await this.firebaseService.isFollowing(post.uid);
+      }
+    });
+  }
+  async followUser(uid: string, post: any, ev: Event) {
+    ev.stopPropagation();
+    await this.firebaseService.followUser(uid);
+    post.isFollowing = !post.isFollowing;
   }
 
   doRefresh(event: any) {
@@ -183,7 +190,7 @@ export class Tab1Page implements OnInit {
     if (user) {
       this.firebaseService.savePost(user.uid, postId);
       const toast = await this.toast.create({
-        message: "Post Saved",
+        message: 'Post Saved',
         duration: 3000,
         position: 'top',
       });

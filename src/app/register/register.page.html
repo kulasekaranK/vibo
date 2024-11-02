@@ -7,27 +7,34 @@
   </ion-header>
 
   <form #registerForm="ngForm">
-    <ion-list class="ion-padding ">
-
+    <ion-list class="ion-padding">
       <ion-item lines="none">
-        <ion-title class="ion-text-center" size="large" mode="md">Register</ion-title>
+        <ion-title class="ion-text-center" size="large" mode="md"
+          >Register</ion-title
+        >
       </ion-item>
 
       <ion-item>
         <ion-input
-          label="Name"
+          label="Username"
           labelPlacement="floating"
-          name="name"
+          name="username"
           [(ngModel)]="name"
-          #nameCtrl="ngModel"
+          #usernameCtrl="ngModel"
           required
-          pattern="[A-Za-z ]{2,}" 
+          pattern="^[A-Za-z0-9_]{2,}$"
         ></ion-input>
       </ion-item>
-      <ion-item lines="none" *ngIf="nameCtrl.invalid && nameCtrl.touched">
+      <ion-item
+        lines="none"
+        *ngIf="usernameCtrl.invalid && usernameCtrl.touched"
+      >
         <ion-label color="danger">
-          <p *ngIf="nameCtrl.errors?.['required']">Name is required</p>
-          <p *ngIf="nameCtrl.errors?.['pattern']">Name must be at least 2 letters and contain only letters and spaces</p>
+          <p *ngIf="usernameCtrl.errors?.['required']">Username is required</p>
+          <p *ngIf="usernameCtrl.errors?.['pattern']">
+            Username must be at least 2 characters and can only contain letters,
+            numbers, and underscores
+          </p>
         </ion-label>
       </ion-item>
 
@@ -65,7 +72,9 @@
       <ion-item lines="none" *ngIf="phoneCtrl.invalid && phoneCtrl.touched">
         <ion-label color="danger">
           <p *ngIf="phoneCtrl.errors?.['required']">Phone number is required</p>
-          <p *ngIf="phoneCtrl.errors?.['pattern']">Phone number must be between 10 and 15 digits</p>
+          <p *ngIf="phoneCtrl.errors?.['pattern']">
+            Phone number must be between 10 and 15 digits
+          </p>
         </ion-label>
       </ion-item>
 
@@ -79,32 +88,42 @@
           #passwordCtrl="ngModel"
           required
           minlength="6"
-          pattern="(?=.*[0-9])(?=.*[A-Za-z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}" 
+          pattern="(?=.*[0-9])(?=.*[A-Za-z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}"
         ></ion-input>
       </ion-item>
-      <ion-item lines="none" *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+      <ion-item
+        lines="none"
+        *ngIf="passwordCtrl.invalid && passwordCtrl.touched"
+      >
         <ion-label color="danger">
           <p *ngIf="passwordCtrl.errors?.['required']">Password is required</p>
-          <p *ngIf="passwordCtrl.errors?.['minlength']">Password must be at least 6 characters</p>
-          <p *ngIf="passwordCtrl.errors?.['pattern']">Password must contain letters, numbers, and special characters</p>
+          <p *ngIf="passwordCtrl.errors?.['minlength']">
+            Password must be at least 6 characters
+          </p>
+          <p *ngIf="passwordCtrl.errors?.['pattern']">
+            Password must contain letters, numbers, and special characters
+          </p>
         </ion-label>
       </ion-item>
 
       <ion-item lines="none">
         <ion-button
-          color="tertiary"
+          color="primary"
           size="default"
           expand="block"
           type="submit"
           [disabled]="registerForm.invalid"
           (click)="register()"
-        >Register</ion-button>
+          >Register</ion-button
+        >
       </ion-item>
 
       <div class="ion-padding">
-        <ion-label>Already have an account? <a [routerLink]="['/login']">Login</a></ion-label>
+        <ion-label
+          >Already have an account?
+          <a [routerLink]="['/login']">Login</a></ion-label
+        >
       </div>
-
     </ion-list>
   </form>
 </ion-content>

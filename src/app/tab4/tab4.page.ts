@@ -218,18 +218,20 @@ export class Tab4Page implements OnInit {
 
     this.initializeDarkPalette(prefersDark.matches);
 
-    prefersDark.addEventListener('change', (mediaQuery) =>
-      this.initializeDarkPalette(mediaQuery.matches)
+    prefersDark.addEventListener('change', (event) =>
+      this.initializeDarkPalette(event.matches)
     );
   }
-  initializeDarkPalette(isDark: any) {
+  initializeDarkPalette(isDark: boolean) {
     this.paletteToggle = isDark;
     this.toggleDarkPalette(isDark);
   }
-  toggleChange(ev: any) {
+
+  toggleChange(ev: CustomEvent) {
     this.toggleDarkPalette(ev.detail.checked);
   }
-  toggleDarkPalette(shouldAdd: any) {
+
+  toggleDarkPalette(shouldAdd: boolean) {
     document.documentElement.classList.toggle('ion-palette-dark', shouldAdd);
   }
 

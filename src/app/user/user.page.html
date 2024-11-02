@@ -1,9 +1,9 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar mode="md">
-    <ion-buttons slot="start"> 
+  <ion-toolbar>
+    <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-title>{{userName}}</ion-title>
+
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -24,6 +24,7 @@
       <ion-col size="12" class="ion-text-center">
         <ion-text>
           <h2>{{userDetails?.name}}</h2>
+          <p>{{userName}}</p>
           <p>{{userDetails?.bio}}</p>
         </ion-text>
       </ion-col>
@@ -57,15 +58,15 @@
       <ion-card mode="ios" class="post-card">
         <ion-img [src]="post.postLink" class="post-image"></ion-img>
         <div class="post-overlay">
-          <ion-button fill="clear" size="large" (click)="onLikePost(post.id)" color="medium">
+          <ion-button fill="clear" size="large" (click)="onLikePost(post.id)" color="dark">
             <ion-icon
               name="heart-outline"
-              [color]="post.userLikes ? 'danger' : 'medium'"
+              [color]="post.userLikes ? 'primary' : 'dark'"
             ></ion-icon>
             <span>{{ post.likes }}</span>
           </ion-button>
           <ion-button fill="clear" (click)="openCommentModal(post.id)">
-            <ion-icon color="medium" name="chatbubble-outline"></ion-icon>
+            <ion-icon color="dark" name="chatbubble-outline"></ion-icon>
           </ion-button>
         </div>
       </ion-card>

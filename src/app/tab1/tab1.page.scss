@@ -26,5 +26,10 @@ ion-header {
     width: 90px;
     height: 90px;
     border: 2px solid var(--ion-color-primary);
+    padding: 3px;
+  }
+  ion-button{
+  text-transform: lowercase;
+
   }
 }

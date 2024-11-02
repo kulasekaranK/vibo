@@ -12,6 +12,7 @@
         <p>{{userName}}</p>
       </ion-label>
     </ion-title>
+
   </ion-toolbar>
 </ion-header>
 <ion-content>
@@ -22,11 +23,11 @@
           <img [src]="message.senderAvatar" alt="" />
         </ion-avatar>
           <div [ngClass]="message.senderId === currentUserDetails?.uid ? 'own-message' : 'received-message'" >
-            <ion-label class="ion-margin-bottom" color="light">
+            <ion-label class="ion-margin-bottom" color="dark">
               <h2>{{ message.text }}</h2>
             </ion-label>
             <div class="ion-text-end">
-              <ion-note color="medium">{{ message.timestamp | date: 'shortTime' }}</ion-note>
+              <ion-note color="warning">{{ message.timestamp | date: 'shortTime' }}</ion-note>
              </div>
           </div>
       </ion-item>
