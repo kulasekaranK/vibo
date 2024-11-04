@@ -1,0 +1,54 @@
+
+Ë
+;
+android*http://schemas.android.com/apk/res/android.
+5
+fiam'http://schemas.android.com/apk/res-auto.Mcom.google.firebase.inappmessaging.display.internal.layout.CardLayoutPortrait"|
+'http://schemas.android.com/apk/res-automaxHeightPct@dimen/dialogHeightPct"(á…Œø2!
+’˜ødimen/dialogHeightPct0 "y
+'http://schemas.android.com/apk/res-automaxWidthPct@dimen/dialogWidthPct"(ç…Œø2 
+“˜ødimen/dialogWidthPct0 "`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightmatch_parent"(õ„2:0ÿÿÿÿÿÿÿÿÿ"@style@style/FiamUI.Card"2
+®‚Äøstyle/FiamUI.Card0ÿÿ"e
+*http://schemas.android.com/apk/res/androidtheme@style/FiamUI"(€€„2
+¬‚Äøstyle/FiamUI0"s
+*http://schemas.android.com/apk/res/androidid@+id/card_content_root"(Ğ„2 
+ê€ øid/card_content_root0"S
+*http://schemas.android.com/apk/res/androidlayout_gravitycenter"(³„2:8*Ñ
+È	ImageView"Tstyle@style/FiamUI.Card.ImageView"2)
+'±‚Äøstyle/FiamUI.Card.ImageView0ÿÿ"e
+*http://schemas.android.com/apk/res/androidid@+id/image_view"(Ğ„2
+Ú øid/image_view05*¹
+°TextView"x
+*http://schemas.android.com/apk/res/androidpaddingRight@dimen/paddingSmall"(Ø„2
+›†˜ødimen/paddingSmall0@"w
+*http://schemas.android.com/apk/res/androidpaddingLeft@dimen/paddingSmall"(Ö„2
+›†˜ødimen/paddingSmall0@"Lstyle@style/FiamUI.Text.Title"2%
+#º‚Äøstyle/FiamUI.Text.Title0ÿÿ"k
+*http://schemas.android.com/apk/res/androidid@+id/message_title"(Ğ„2
+Š‚ øid/message_title0"v
+*http://schemas.android.com/apk/res/android
+paddingTop@dimen/paddingSmall"(×„2
+›†˜ødimen/paddingSmall0@:*›
+’
+ScrollView"Nstyle@style/FiamUI.Card.Scroll"2&
+$²‚Äøstyle/FiamUI.Card.Scroll0ÿÿ"g
+*http://schemas.android.com/apk/res/androidid@+id/body_scroll"(Ğ„2
+Ş€ øid/body_scroll0*Ê
+ÁTextView"Jstyle@style/FiamUI.ModalBody""2$
+"¶‚Äøstyle/FiamUI.ModalBody0ÿÿ"i
+*http://schemas.android.com/apk/res/androidid@+id/message_body""(Ğ„2
+‰‚ øid/message_body0";+*¦
+LinearLayout"Tstyle@style/FiamUI.Card.ActionBar"'2)
+'¯‚Äøstyle/FiamUI.Card.ActionBar0ÿÿ"e
+*http://schemas.android.com/apk/res/androidid@+id/action_bar"'(Ğ„2
+±€ øid/action_bar0*è
+ßButton"bstyle#@style/FiamUI.Card.ActionBar.Button"-20
+.°‚Äø"style/FiamUI.Card.ActionBar.Button0ÿÿ"q
+*http://schemas.android.com/apk/res/androidid@+id/secondary_button"-(Ğ„2
+ÿ‚ øid/secondary_button0-)*ä
+ÛButton"bstyle#@style/FiamUI.Card.ActionBar.Button"320
+.°‚Äø"style/FiamUI.Card.ActionBar.Button0ÿÿ"m
+*http://schemas.android.com/apk/res/androidid@+id/primary_button"3(Ğ„2
+İ‚ øid/primary_button03)'..
